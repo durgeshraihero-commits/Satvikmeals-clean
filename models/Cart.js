@@ -2,18 +2,21 @@ import mongoose from "mongoose";
 
 const CartSchema = new mongoose.Schema(
   {
-    userEmail: {
-      type: String,
-      required: true,
-      unique: true
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true
     },
     items: [
       {
         itemId: String,
         name: String,
         price: Number,
-        quantity: Number,
-        image: String
+        image: String,
+        quantity: {
+          type: Number,
+          default: 1
+        }
       }
     ]
   },
