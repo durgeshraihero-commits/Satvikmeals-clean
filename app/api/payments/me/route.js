@@ -7,7 +7,9 @@ export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const email = searchParams.get("email");
 
-  if (!email) return Response.json([]);
+  if (!email) {
+    return Response.json([], { status: 200 });
+  }
 
   const payments = await Payment.find({ userEmail: email })
     .sort({ createdAt: -1 });
