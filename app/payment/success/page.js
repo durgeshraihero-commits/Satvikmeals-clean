@@ -1,38 +1,12 @@
-"use client";
-import { useEffect } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { Suspense } from "react";
+import PaymentSuccessClient from "./success-client";
 
-export default function PaymentSuccess() {
-  const params = useSearchParams();
-  const router = useRouter();
+export const dynamic = "force-dynamic";
 
-  useEffect(() => {
-    async function confirmOrder() {
-      const payment_id = params.get("payment_id");
-      const payment_request_id = params.get("payment_request_id");
-
-      if (!payment_id || !payment_request_id) return;
-
-      await fetch("/api/orders/save", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          paymentId: payment_id,
-          paymentRequestId: payment_request_id
-        })
-      });
-    }
-
-    confirmOrder();
-  }, []);
-
+export default function PaymentSuccessPage() {
   return (
-    <div style={{ padding: 40, textAlign: "center" }}>
-      <h1>✅ Payment Successful</h1>
-      <p>Your order has been placed.</p>
-      <button onClick={() => router.push("/dashboard/orders")}>
-        View Orders
-      </button>
-    </div>
+    <Suspense fallback={<p style={{ padding: 40 }}>Confirming payment...</p>}>
+      <PaymentSuccessClient />
+    </Suspense>
   );
 }
