@@ -1,23 +1,27 @@
 import dbConnect from "@/lib/mongodb";
-import Cart from "@/models/Cart";
 import Order from "@/models/Order";
-import User from "@/models/User";
+import Cart from "@/models/Cart";
 
 export async function POST(req) {
   try {
     await dbConnect();
 
-    const { paymentId, paymentRequestId } = await req.json();
+    const { paymentId, paymentStatus, email } = await req.json();
 
-    if (!paymentId || !paymentRequestId) {
-      return Response.json({ error: "Missing payment info" }, { status: 400 });
+    if (!paymentId || !paymentStatus || !email) {
+      return Response.json(
+        { error: "Missing payment info" },
+        { status: 400 }
+      );
     }
 
-    // TEMP: get last logged-in user (email stored in cart)
-    const cart = await Cart.findOne().sort({ updatedAt: -1 });
+    const cart = await Cart.findOne({ userEmail: email });
 
     if (!cart || cart.items.length === 0) {
-      return Response.json({ error: "Cart empty" }, { status: 400 });
+      return Response.json(
+        { error: "Cart empty" },
+        { status: 400 }
+      );
     }
 
     const total = cart.items.reduce(
@@ -26,23 +30,24 @@ export async function POST(req) {
     );
 
     const order = await Order.create({
-      userEmail: cart.userEmail,
+      userEmail: email,
       items: cart.items,
       totalAmount: total,
-      paymentMethod: "online",
       paymentId,
-      paymentRequestId,
-      status: "paid"
+      paymentStatus,
+      paymentMethod: "online"
     });
 
-    // Clear cart after order
+    // clear cart
     cart.items = [];
     await cart.save();
 
     return Response.json({ success: true, order });
-
   } catch (err) {
     console.error("Order save error:", err);
-    return Response.json({ error: "Order save failed" }, { status: 500 });
+    return Response.json(
+      { error: "Server error" },
+      { status: 500 }
+    );
   }
 }

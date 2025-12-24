@@ -1,12 +1,35 @@
-import { Suspense } from "react";
-import PaymentSuccessClient from "./success-client";
+"use client";
 
-export const dynamic = "force-dynamic";
+import { useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 
-export default function PaymentSuccessPage() {
+export default function PaymentSuccess() {
+  const params = useSearchParams();
+
+  useEffect(() => {
+    const paymentId = params.get("payment_id");
+    const paymentStatus = params.get("payment_status");
+
+    const email = localStorage.getItem("userEmail"); // saved at login
+
+    if (!paymentId || !paymentStatus || !email) return;
+
+    fetch("/api/orders/save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        paymentId,
+        paymentStatus,
+        email
+      })
+    });
+  }, []);
+
   return (
-    <Suspense fallback={<p style={{ padding: 40 }}>Confirming payment...</p>}>
-      <PaymentSuccessClient />
-    </Suspense>
+    <div style={{ padding: 30, textAlign: "center" }}>
+      <h2>✅ Payment Successful</h2>
+      <p>Your order has been placed.</p>
+      <a href="/orders">View Orders</a>
+    </div>
   );
 }
