@@ -1,20 +1,18 @@
 import dbConnect from "../../../lib/mongodb";
 import Cart from "../../../models/Cart";
-import User from "../../../models/User";
 
-/* TEMP USER (until auth is stable) */
-const TEMP_EMAIL = "durgeshrai214@gmail.com";
+const USER_EMAIL = "durgeshrai214@gmail.com"; // TEMP USER
 
 export async function GET() {
   await dbConnect();
 
-  const user = await User.findOne({ email: TEMP_EMAIL });
-  if (!user) return Response.json({ items: [] });
-
-  let cart = await Cart.findOne({ userId: user._id });
+  let cart = await Cart.findOne({ userEmail: USER_EMAIL });
 
   if (!cart) {
-    cart = await Cart.create({ userId: user._id, items: [] });
+    cart = await Cart.create({
+      userEmail: USER_EMAIL,
+      items: []
+    });
   }
 
   return Response.json(cart);
@@ -24,15 +22,13 @@ export async function POST(req) {
   await dbConnect();
   const body = await req.json();
 
-  const user = await User.findOne({ email: TEMP_EMAIL });
-  if (!user) {
-    return Response.json({ error: "User not found" }, { status: 404 });
-  }
-
-  let cart = await Cart.findOne({ userId: user._id });
+  let cart = await Cart.findOne({ userEmail: USER_EMAIL });
 
   if (!cart) {
-    cart = await Cart.create({ userId: user._id, items: [] });
+    cart = await Cart.create({
+      userEmail: USER_EMAIL,
+      items: []
+    });
   }
 
   const index = cart.items.findIndex(
@@ -59,10 +55,7 @@ export async function PATCH(req) {
   await dbConnect();
   const { itemId, action } = await req.json();
 
-  const user = await User.findOne({ email: TEMP_EMAIL });
-  if (!user) return Response.json({ error: "User not found" });
-
-  const cart = await Cart.findOne({ userId: user._id });
+  const cart = await Cart.findOne({ userEmail: USER_EMAIL });
   if (!cart) return Response.json({ items: [] });
 
   const item = cart.items.find(i => i.itemId === itemId);
