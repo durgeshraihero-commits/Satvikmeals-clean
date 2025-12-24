@@ -23,12 +23,15 @@ export async function POST(req) {
     return Response.json({ error: "Invalid credentials" }, { status: 401 });
   }
 
-  const token = jwt.sign(
-    { userId: user._id,email: user.email, role: user.role },
-    process.env.JWT_SECRET,
-    { expiresIn: "7d" }
-  );
-
+const token = jwt.sign(
+  {
+    userId: user._id,
+    email: user.email,   // ✅ REQUIRED
+    role: user.role || "user"
+  },
+  process.env.JWT_SECRET,
+  { expiresIn: "7d" }
+);
   cookies().set("token", token, {
     httpOnly: true,
     secure: true,
