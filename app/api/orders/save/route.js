@@ -1,42 +1,50 @@
-export const dynamic = "force-dynamic";
-
 import dbConnect from "@/lib/mongodb";
 import Cart from "@/models/Cart";
 import Order from "@/models/Order";
-import { cookies } from "next/headers";
-import jwt from "jsonwebtoken";
+import Payment from "@/models/Payment";
+import { getUserFromToken } from "@/lib/auth";
 
-export async function POST() {
+export async function POST(req) {
   await dbConnect();
 
-  // 🔐 get user from token
-  const token = cookies().get("token")?.value;
-  if (!token) {
+  const user = getUserFromToken();
+  if (!user) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  const email = decoded.email;
+  const { paymentId, paymentRequestId } = await req.json();
 
-  // 🛒 get cart
-  const cart = await Cart.findOne({ userEmail: email });
+  const cart = await Cart.findOne({ userEmail: user.email });
   if (!cart || cart.items.length === 0) {
     return Response.json({ error: "Cart empty" }, { status: 400 });
   }
 
-  const total = cart.items.reduce(
+  const totalAmount = cart.items.reduce(
     (sum, i) => sum + i.price * i.quantity,
     0
   );
 
-  // 📦 save order
-  await Order.create({
-    userEmail: email,
+  // ✅ SAVE ORDER
+  const order = await Order.create({
+    userEmail: user.email,
     items: cart.items,
-    totalAmount: total,
+    totalAmount,
+    paymentMethod: "online",
+    status: "paid"
   });
 
-  // 🧹 clear cart
+  // ✅ SAVE PAYMENT
+  await Payment.create({
+    userEmail: user.email,
+    orderId: order._id,
+    amount: totalAmount,
+    provider: "Instamojo",
+    paymentId,
+    paymentRequestId,
+    status: "success"
+  });
+
+  // ✅ CLEAR CART
   cart.items = [];
   await cart.save();
 
