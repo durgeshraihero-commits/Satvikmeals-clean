@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 export default function AddonsPage() {
   const [addons, setAddons] = useState([]);
+  const userEmail = "durgeshrai214@gmail.com"; // TEMP
 
   useEffect(() => {
     fetch("/api/addons")
@@ -15,28 +16,30 @@ export default function AddonsPage() {
     <div className="dashboard-section">
       <h2>➕ Extra Add-Ons</h2>
 
-      <div style={{ display: "grid", gap: 20 }}>
-        {addons.map(a => (
-          <div key={a._id} className="info-box">
-            <img src={a.image} width="100%" />
-            <h3>{a.name}</h3>
-            <p>{a.description}</p>
-            <strong>₹{a.price}</strong>
+      {addons.map(a => (
+        <div key={a._id} className="info-box">
+          <h3>{a.name}</h3>
+          <strong>₹{a.price}</strong>
 
-            <button
-              onClick={() =>
-                fetch("/api/cart", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify(a)
+          <button
+            onClick={() =>
+              fetch("/api/cart", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  email: userEmail,
+                  itemId: a._id,
+                  name: a.name,
+                  price: a.price,
+                  image: a.image || ""
                 })
-              }
-            >
-              🛒 Add to Cart
-            </button>
-          </div>
-        ))}
-      </div>
+              })
+            }
+          >
+            🛒 Add to Cart
+          </button>
+        </div>
+      ))}
     </div>
   );
 }
