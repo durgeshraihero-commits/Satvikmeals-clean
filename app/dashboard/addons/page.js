@@ -1,0 +1,42 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+export default function AddonsPage() {
+  const [addons, setAddons] = useState([]);
+
+  useEffect(() => {
+    fetch("/api/addons")
+      .then(res => res.json())
+      .then(setAddons);
+  }, []);
+
+  return (
+    <div className="dashboard-section">
+      <h2>➕ Extra Add-Ons</h2>
+
+      <div style={{ display: "grid", gap: 20 }}>
+        {addons.map(a => (
+          <div key={a._id} className="info-box">
+            <img src={a.image} width="100%" />
+            <h3>{a.name}</h3>
+            <p>{a.description}</p>
+            <strong>₹{a.price}</strong>
+
+            <button
+              onClick={() =>
+                fetch("/api/cart", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(a)
+                })
+              }
+            >
+              🛒 Add to Cart
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
