@@ -1,10 +1,6 @@
 import dbConnect from "../../../lib/mongodb";
 import Cart from "../../../models/Cart";
 
-/**
- * GET CART
- * /api/cart?email=user@email.com
- */
 export async function GET(req) {
   await dbConnect();
 
@@ -27,13 +23,11 @@ export async function GET(req) {
   return Response.json(cart);
 }
 
-/**
- * ADD ITEM TO CART
- */
 export async function POST(req) {
   await dbConnect();
 
-  const { email, itemId, name, price, image } = await req.json();
+  const body = await req.json();
+  const { email, itemId, name, price, image } = body;
 
   if (!email || !itemId) {
     return Response.json({ error: "Missing data" }, { status: 400 });
@@ -48,10 +42,6 @@ export async function POST(req) {
     });
   }
 
-  // ❌ block base64 images
-  const safeImage =
-    image && image.startsWith("data:") ? null : image;
-
   const index = cart.items.findIndex(i => i.itemId === itemId);
 
   if (index > -1) {
@@ -61,7 +51,7 @@ export async function POST(req) {
       itemId,
       name,
       price,
-      image: safeImage,
+      image,
       quantity: 1
     });
   }
@@ -70,9 +60,6 @@ export async function POST(req) {
   return Response.json(cart);
 }
 
-/**
- * UPDATE QUANTITY
- */
 export async function PATCH(req) {
   await dbConnect();
 
@@ -92,7 +79,7 @@ export async function PATCH(req) {
   if (action === "dec") item.quantity -= 1;
 
   cart.items = cart.items.filter(i => i.quantity > 0);
-
   await cart.save();
+
   return Response.json(cart);
 }
