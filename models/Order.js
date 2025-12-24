@@ -2,11 +2,26 @@ import mongoose from "mongoose";
 
 const OrderSchema = new mongoose.Schema(
   {
-    userEmail: String,
-    items: Array,
-    totalAmount: Number,
-    paymentId: String,
-    paymentStatus: String,
+    userEmail: {
+      type: String,
+      required: true
+    },
+    items: {
+      type: Array,
+      required: true
+    },
+    totalAmount: {
+      type: Number,
+      required: true
+    },
+    paymentId: {
+      type: String,
+      required: true
+    },
+    paymentStatus: {
+      type: String,
+      default: "Credit"
+    },
     paymentMethod: {
       type: String,
       default: "online"

@@ -2,13 +2,26 @@ import mongoose from "mongoose";
 
 const PaymentSchema = new mongoose.Schema(
   {
-    userEmail: String,
-    orderId: mongoose.Schema.Types.ObjectId,
-    amount: Number,
-    provider: String,
-    paymentId: String,
-    paymentRequestId: String,
-    status: String
+    userEmail: {
+      type: String,
+      required: true
+    },
+    paymentId: {
+      type: String,
+      required: true
+    },
+    amount: {
+      type: Number,
+      required: true
+    },
+    status: {
+      type: String,
+      default: "Credit"
+    },
+    method: {
+      type: String,
+      default: "online"
+    }
   },
   { timestamps: true }
 );

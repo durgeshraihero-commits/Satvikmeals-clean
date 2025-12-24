@@ -1,20 +1,22 @@
 import dbConnect from "@/lib/mongodb";
 import Order from "@/models/Order";
+import Payment from "@/models/Payment";
 import Cart from "@/models/Cart";
 
 export async function POST(req) {
   try {
     await dbConnect();
 
-    const { paymentId, paymentStatus, email } = await req.json();
+    const { paymentId, paymentStatus, email, amount } = await req.json();
 
-    if (!paymentId || !paymentStatus || !email) {
+    if (!paymentId || !email || !amount) {
       return Response.json(
         { error: "Missing payment info" },
         { status: 400 }
       );
     }
 
+    // Get user's cart
     const cart = await Cart.findOne({ userEmail: email });
 
     if (!cart || cart.items.length === 0) {
@@ -24,25 +26,34 @@ export async function POST(req) {
       );
     }
 
-    const total = cart.items.reduce(
-      (sum, i) => sum + i.price * i.quantity,
-      0
-    );
-
+    // 1️⃣ SAVE ORDER
     const order = await Order.create({
       userEmail: email,
       items: cart.items,
-      totalAmount: total,
+      totalAmount: amount,
       paymentId,
-      paymentStatus,
+      paymentStatus: paymentStatus || "Credit",
       paymentMethod: "online"
     });
 
-    // clear cart
+    // 2️⃣ SAVE PAYMENT
+    await Payment.create({
+      userEmail: email,
+      paymentId,
+      amount,
+      status: paymentStatus || "Credit",
+      method: "online"
+    });
+
+    // 3️⃣ CLEAR CART
     cart.items = [];
     await cart.save();
 
-    return Response.json({ success: true, order });
+    return Response.json({
+      success: true,
+      order
+    });
+
   } catch (err) {
     console.error("Order save error:", err);
     return Response.json(

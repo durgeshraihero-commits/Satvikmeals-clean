@@ -6,15 +6,10 @@ const CartSchema = new mongoose.Schema(
       type: String,
       required: true
     },
-    items: [
-      {
-        itemId: String,
-        name: String,
-        price: Number,
-        quantity: Number,
-        image: String
-      }
-    ]
+    items: {
+      type: Array,
+      default: []
+    }
   },
   { timestamps: true }
 );
