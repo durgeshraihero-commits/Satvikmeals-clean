@@ -1,16 +1,25 @@
 import dbConnect from "../../../lib/mongodb";
 import Cart from "../../../models/Cart";
 
-const USER_EMAIL = "durgeshrai214@gmail.com"; // TEMP USER
-
-export async function GET() {
+/**
+ * GET CART
+ * /api/cart?email=user@email.com
+ */
+export async function GET(req) {
   await dbConnect();
 
-  let cart = await Cart.findOne({ userEmail: USER_EMAIL });
+  const { searchParams } = new URL(req.url);
+  const email = searchParams.get("email");
+
+  if (!email) {
+    return Response.json({ error: "Email required" }, { status: 400 });
+  }
+
+  let cart = await Cart.findOne({ userEmail: email });
 
   if (!cart) {
     cart = await Cart.create({
-      userEmail: USER_EMAIL,
+      userEmail: email,
       items: []
     });
   }
@@ -18,31 +27,41 @@ export async function GET() {
   return Response.json(cart);
 }
 
+/**
+ * ADD ITEM TO CART
+ */
 export async function POST(req) {
   await dbConnect();
-  const body = await req.json();
 
-  let cart = await Cart.findOne({ userEmail: USER_EMAIL });
+  const { email, itemId, name, price, image } = await req.json();
+
+  if (!email || !itemId) {
+    return Response.json({ error: "Missing data" }, { status: 400 });
+  }
+
+  let cart = await Cart.findOne({ userEmail: email });
 
   if (!cart) {
     cart = await Cart.create({
-      userEmail: USER_EMAIL,
+      userEmail: email,
       items: []
     });
   }
 
-  const index = cart.items.findIndex(
-    i => i.itemId === body.itemId
-  );
+  // ❌ block base64 images
+  const safeImage =
+    image && image.startsWith("data:") ? null : image;
+
+  const index = cart.items.findIndex(i => i.itemId === itemId);
 
   if (index > -1) {
     cart.items[index].quantity += 1;
   } else {
     cart.items.push({
-      itemId: body.itemId,
-      name: body.name,
-      price: body.price,
-      image: body.image,
+      itemId,
+      name,
+      price,
+      image: safeImage,
       quantity: 1
     });
   }
@@ -51,11 +70,19 @@ export async function POST(req) {
   return Response.json(cart);
 }
 
+/**
+ * UPDATE QUANTITY
+ */
 export async function PATCH(req) {
   await dbConnect();
-  const { itemId, action } = await req.json();
 
-  const cart = await Cart.findOne({ userEmail: USER_EMAIL });
+  const { email, itemId, action } = await req.json();
+
+  if (!email || !itemId) {
+    return Response.json({ error: "Missing data" }, { status: 400 });
+  }
+
+  const cart = await Cart.findOne({ userEmail: email });
   if (!cart) return Response.json({ items: [] });
 
   const item = cart.items.find(i => i.itemId === itemId);
@@ -65,7 +92,7 @@ export async function PATCH(req) {
   if (action === "dec") item.quantity -= 1;
 
   cart.items = cart.items.filter(i => i.quantity > 0);
-  await cart.save();
 
+  await cart.save();
   return Response.json(cart);
 }
