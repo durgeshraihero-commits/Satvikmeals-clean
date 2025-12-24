@@ -2,40 +2,31 @@
 
 import { useEffect, useState } from "react";
 
-export default function PaymentHistoryPage() {
+export default function PaymentsPage() {
   const [payments, setPayments] = useState([]);
-  const [loading, setLoading] = useState(true);
+
+  // TEMP: logged in user email
+  const userEmail = "durgeshrai214@gmail.com";
 
   useEffect(() => {
-    fetch("/api/payments/me")
-      .then((res) => res.json())
-      .then((data) => {
-        setPayments(data);
-        setLoading(false);
-      });
+    fetch(`/api/payments/me?email=${userEmail}`)
+      .then(res => res.json())
+      .then(setPayments);
   }, []);
 
-  if (loading) {
-    return <p style={{ padding: 20 }}>Loading payments...</p>;
-  }
-
   if (!payments.length) {
-    return <p style={{ padding: 20 }}>No payments found</p>;
+    return <p>No payments found</p>;
   }
 
   return (
-    <div className="dashboard-section">
+    <div>
       <h2>💳 Payment History</h2>
 
-      {payments.map((pay) => (
-        <div key={pay._id} className="info-box">
-          <p><strong>Amount:</strong> ₹{pay.amount}</p>
-          <p><strong>Purpose:</strong> {pay.purpose}</p>
-          <p><strong>Status:</strong> {pay.status}</p>
-          <p>
-            <strong>Date:</strong>{" "}
-            {new Date(pay.createdAt).toLocaleDateString()}
-          </p>
+      {payments.map(p => (
+        <div key={p._id} style={{ border: "1px solid #ddd", padding: 10, marginBottom: 10 }}>
+          <p><strong>Payment ID:</strong> {p.paymentId}</p>
+          <p><strong>Amount:</strong> ₹{p.amount}</p>
+          <p><strong>Status:</strong> {p.status}</p>
         </div>
       ))}
     </div>
