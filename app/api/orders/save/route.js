@@ -1,13 +1,27 @@
-import dbConnect from "../../../../lib/mongodb";
-import Cart from "../../../../models/Cart";
-import Order from "../../../../models/Order";
+export const dynamic = "force-dynamic";
+
+import dbConnect from "@/lib/mongodb";
+import Cart from "@/models/Cart";
+import Order from "@/models/Order";
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
 
 export async function POST() {
   await dbConnect();
 
-  const cart = await Cart.findOne();
+  // 🔐 get user from token
+  const token = cookies().get("token")?.value;
+  if (!token) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const email = decoded.email;
+
+  // 🛒 get cart
+  const cart = await Cart.findOne({ userEmail: email });
   if (!cart || cart.items.length === 0) {
-    return Response.json({ error: "Cart empty" });
+    return Response.json({ error: "Cart empty" }, { status: 400 });
   }
 
   const total = cart.items.reduce(
@@ -15,14 +29,14 @@ export async function POST() {
     0
   );
 
+  // 📦 save order
   await Order.create({
-    userEmail: "durgeshrai214@gmail.com", // TEMP
+    userEmail: email,
     items: cart.items,
     totalAmount: total,
-    paymentMethod: "instamojo",
-    paymentId: "INSTAMOJO_TXN"
   });
 
+  // 🧹 clear cart
   cart.items = [];
   await cart.save();
 

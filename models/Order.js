@@ -2,51 +2,30 @@ import mongoose from "mongoose";
 
 const OrderSchema = new mongoose.Schema(
   {
-    userEmail: {
-      type: String,
-      required: true
-    },
+    userEmail: { type: String, required: true },
 
     items: [
       {
-        name: {
-          type: String,
-          required: true
-        },
-        price: {
-          type: Number,
-          required: true
-        },
-        quantity: {
-          type: Number,
-          required: true
-        },
-        image: {
-          type: String,
-          default: ""
-        }
-      }
+        name: String,
+        price: Number,
+        quantity: Number,
+        image: String,
+      },
     ],
 
-    totalAmount: {
-      type: Number,
-      required: true
-    },
+    totalAmount: Number,
 
     paymentMethod: {
       type: String,
-      enum: ["wallet", "online"],
-      default: "wallet"
+      default: "instamojo",
     },
 
-    status: {
+    paymentStatus: {
       type: String,
-      default: "paid"
-    }
+      default: "paid",
+    },
   },
-  {
-    timestamps: true
-  }
+  { timestamps: true }
 );
 
 export default mongoose.models.Order ||

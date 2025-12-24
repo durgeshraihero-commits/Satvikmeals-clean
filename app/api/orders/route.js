@@ -1,53 +1,20 @@
-"use client";
+export const dynamic = "force-dynamic";
 
-import { useEffect, useState } from "react";
+import dbConnect from "@/lib/mongodb";
+import Order from "@/models/Order";
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
 
-export default function OrdersPage() {
-  const [orders, setOrders] = useState([]);
+export async function GET() {
+  await dbConnect();
 
-  useEffect(() => {
-    fetch("/api/orders", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: "durgeshrai214@gmail.com"
-      })
-    })
-      .then(res => res.json())
-      .then(setOrders);
-  }, []);
+  const token = cookies().get("token")?.value;
+  if (!token) return Response.json([]);
 
-  if (orders.length === 0) {
-    return <p style={{ padding: 20 }}>No orders yet</p>;
-  }
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-  return (
-    <div style={{ maxWidth: 600, margin: "auto", padding: 16 }}>
-      <h2>📦 My Orders</h2>
+  const orders = await Order.find({ userEmail: decoded.email })
+    .sort({ createdAt: -1 });
 
-      {orders.map(order => (
-        <div
-          key={order._id}
-          style={{
-            background: "#fff",
-            borderRadius: 14,
-            padding: 14,
-            marginTop: 14
-          }}
-        >
-          <p><strong>Date:</strong> {new Date(order.createdAt).toLocaleString()}</p>
-          <p><strong>Total:</strong> ₹{order.totalAmount}</p>
-          <p><strong>Payment:</strong> {order.paymentMethod}</p>
-
-          <ul>
-            {order.items.map((i, idx) => (
-              <li key={idx}>
-                {i.name} × {i.quantity} — ₹{i.price}
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
-    </div>
-  );
+  return Response.json(orders);
 }
