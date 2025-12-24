@@ -9,21 +9,25 @@ const OrderSchema = new mongoose.Schema(
         name: String,
         price: Number,
         quantity: Number,
-        image: String,
-      },
+        image: String
+      }
     ],
 
     totalAmount: Number,
 
     paymentMethod: {
       type: String,
-      default: "instamojo",
+      enum: ["wallet", "online"],
+      default: "online"
     },
 
-    paymentStatus: {
+    paymentId: String,
+    paymentRequestId: String,
+
+    status: {
       type: String,
-      default: "paid",
-    },
+      default: "paid"
+    }
   },
   { timestamps: true }
 );
