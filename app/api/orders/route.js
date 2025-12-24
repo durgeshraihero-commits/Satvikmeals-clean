@@ -1,11 +1,18 @@
 import dbConnect from "@/lib/mongodb";
 import Order from "@/models/Order";
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
 
-export async function GET(req) {
+export async function GET() {
   await dbConnect();
 
-  const email = req.headers.get("x-user-email");
-  if (!email) return Response.json([]);
+  const token = cookies().get("token")?.value;
+  if (!token) {
+    return Response.json([], { status: 401 });
+  }
+
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const email = decoded.email;
 
   const orders = await Order.find({ userEmail: email })
     .sort({ createdAt: -1 });
