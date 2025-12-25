@@ -1,31 +1,58 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
 export default function MenuPage() {
+  const [weekly, setWeekly] = useState(null);
+  const [subscribed, setSubscribed] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/weekly-menu")
+      .then(res => res.json())
+      .then(setWeekly);
+
+    fetch("/api/subscription/me")
+      .then(res => res.json())
+      .then(data => setSubscribed(!!data));
+  }, []);
+
   return (
-    <div className="menu-page light-section">
-      <h1>Today's Menu</h1>
-      <p>
-        Our menu changes daily to ensure freshness. All meals include
-        roti, rice, dal, seasonal sabzi & salad.
-      </p>
+    <div style={{ padding: 20 }}>
+      <h2>📅 Weekly Meal Planner</h2>
 
-      <div className="card">
-        <h3>Home Style Veg Thali</h3>
-        <p>Freshly prepared using premium ingredients.</p>
-      </div>
+      {!weekly?.days && <p>No planner published</p>}
 
-      <div className="card">
-        <h3>Seasonal Sabzi</h3>
-        <p>Cooked daily with seasonal vegetables.</p>
-      </div>
+      {weekly?.days?.map((d, i) => (
+        <div key={i} style={{ marginBottom: 30 }}>
+          <h3>{d.day} ({d.date})</h3>
 
-      <div className="card">
-        <h3>Fresh Dal</h3>
-        <p>Protein-rich, hygienic and tasty.</p>
-      </div>
+          <h4>🍱 Lunch</h4>
+          <div style={{ display: "flex", gap: 10 }}>
+            {d.lunch.map((dish, j) => (
+              <div key={j}>
+                <img src={dish.image} width={80} />
+                <p>{dish.name}</p>
+              </div>
+            ))}
+          </div>
 
-      <div className="card">
-        <h3>Roti & Rice</h3>
-        <p>Soft rotis and steamed rice included.</p>
-      </div>
+          <h4>🌙 Dinner</h4>
+          <div style={{ display: "flex", gap: 10 }}>
+            {d.dinner.map((dish, j) => (
+              <div key={j}>
+                <img src={dish.image} width={80} />
+                <p>{dish.name}</p>
+              </div>
+            ))}
+          </div>
+
+          {!subscribed && (
+            <p style={{ color: "red" }}>
+              🔒 Subscribe to get this menu FREE
+            </p>
+          )}
+        </div>
+      ))}
     </div>
   );
 }
