@@ -33,6 +33,9 @@ export default function HomePage() {
           <Link href="/subscribe">
             <button style={greenBtn}>Book Now</button>
           </Link>
+        <Link href="/dashboard">
+  <button style={greenBtn}>Go to Dashboard</button>
+</Link>
         </div>
       </section>
 
