@@ -1,6 +1,7 @@
 import axios from "axios";
-import { PLANS } from "@/lib/plans";
+import qs from "qs";
 import { NextResponse } from "next/server";
+import { PLANS } from "@/lib/plans";
 
 export async function POST(req) {
   try {
@@ -11,9 +12,9 @@ export async function POST(req) {
       return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
     }
 
-    const payload = {
+    const payload = qs.stringify({
       purpose: plan.name,
-      amount: plan.price.toString(),
+      amount: plan.price,
       buyer_name: "SatvikMeals User",
       email: "customer@test.com",
       phone: "9999999999",
@@ -21,37 +22,31 @@ export async function POST(req) {
       allow_repeated_payments: false,
       send_email: false,
       send_sms: false,
-    };
-
-    console.log("📤 Instamojo payload:", payload);
+    });
 
     const response = await axios.post(
-      "https://www.instamojo.com/api/1.1/payment-requests/",
+      `${process.env.INSTAMOJO_BASE_URL}/payment-requests/`,
       payload,
       {
         headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
           "X-Api-Key": process.env.INSTAMOJO_API_KEY,
           "X-Auth-Token": process.env.INSTAMOJO_AUTH_TOKEN,
-          "Content-Type": "application/x-www-form-urlencoded",
         },
       }
     );
 
-    console.log("📥 Instamojo response:", response.data);
-
     if (!response.data.success) {
-      return NextResponse.json(
-        { error: response.data.message },
-        { status: 500 }
-      );
+      console.error("Instamojo failed:", response.data);
+      return NextResponse.json({ error: "Instamojo rejected request" }, { status: 500 });
     }
 
-    const longurl = response.data.payment_request.longurl;
-
-    return NextResponse.json({ url: longurl });
+    return NextResponse.json({
+      url: response.data.payment_request.longurl,
+    });
 
   } catch (err) {
-    console.error("❌ Instamojo ERROR:", err.response?.data || err.message);
+    console.error("Instamojo error:", err.response?.data || err.message);
     return NextResponse.json({ error: "Payment failed" }, { status: 500 });
   }
 }
