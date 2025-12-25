@@ -15,35 +15,43 @@ export async function POST(req) {
     return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
   }
 
+  // ✅ IMPORTANT: x-www-form-urlencoded
+  const body = new URLSearchParams({
+    purpose: plan.name,
+    amount: plan.price.toString(),
+    buyer_name: user.name || "Satvik User",
+    email: user.email,
+    redirect_url: `${process.env.BASE_URL}/api/payment/success`,
+    send_email: "false",
+    send_sms: "false",
+    allow_repeated_payments: "false",
+  });
+
   const response = await fetch(
     "https://www.instamojo.com/api/1.1/payment-requests/",
     {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
         "X-Api-Key": process.env.INSTAMOJO_API_KEY,
         "X-Auth-Token": process.env.INSTAMOJO_AUTH_TOKEN,
+        "Content-Type": "application/x-www-form-urlencoded",
       },
-      body: JSON.stringify({
-        purpose: plan.name,
-        amount: plan.price,
-        buyer_name: user.name || user.email,
-        email: user.email,
-        redirect_url: `${process.env.BASE_URL}/api/payment/success`,
-      }),
+      body,
     }
   );
 
   const data = await response.json();
 
-  const longurl = data?.payment_request?.longurl;
+  console.log("INSTAMOJO RESPONSE:", data);
 
-  if (!longurl) {
+  if (!data.success) {
     return NextResponse.json(
-      { error: "Instamojo URL not received", raw: data },
+      { error: "Instamojo error", data },
       { status: 500 }
     );
   }
 
-  return NextResponse.json({ url: longurl });
+  return NextResponse.json({
+    url: data.payment_request.longurl,
+  });
 }
