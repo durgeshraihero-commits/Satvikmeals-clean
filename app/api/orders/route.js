@@ -12,7 +12,7 @@ export async function GET(req) {
   }
 
   const orders = await Order.find({ userEmail: email }).sort({
-    createdAt: -1,
+    createdAt: -1
   });
 
   return Response.json(orders);
