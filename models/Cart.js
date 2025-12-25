@@ -1,17 +1,17 @@
 import mongoose from "mongoose";
 
-const CartItemSchema = new mongoose.Schema({
-  itemId: { type: String, required: true },
-  name: String,
-  price: Number,
-  image: String,
-  quantity: { type: Number, default: 1 }
-});
-
 const CartSchema = new mongoose.Schema(
   {
     userEmail: { type: String, required: true },
-    items: [CartItemSchema]
+    items: [
+      {
+        itemId: String,
+        name: String,
+        price: Number,
+        image: String,
+        quantity: { type: Number, default: 1 }
+      }
+    ]
   },
   { timestamps: true }
 );
