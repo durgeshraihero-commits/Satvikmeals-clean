@@ -1,38 +1,41 @@
 "use client";
+
 import { useEffect, useState } from "react";
 
 export default function WeeklyMenuPage() {
   const [menu, setMenu] = useState(null);
 
   useEffect(() => {
-    fetch("/api/admin/weekly-menu")
+    fetch("/api/weekly-menu")
       .then(res => res.json())
       .then(setMenu);
   }, []);
 
-  if (!menu) return <p>Loading weekly menu...</p>;
+  if (!menu?.days) {
+    return <p style={{ padding: 20 }}>No weekly menu published yet.</p>;
+  }
 
   return (
-    <div style={{ padding: 16 }}>
-      <h2>📅 Weekly Meal Planner</h2>
+    <div style={{ padding: 20 }}>
+      <h1>🍱 Weekly Meal Plan</h1>
 
-      {menu.days.map(day => (
-        <div key={day.date} style={{ marginBottom: 20 }}>
-          <h3>{day.date}</h3>
+      {menu.days.map((day, i) => (
+        <div key={i} style={{ marginBottom: 24 }}>
+          <h2>{day.date}</h2>
 
-          <div style={{ display: "flex", gap: 12 }}>
-            <div>
-              <h4>🌞 Lunch</h4>
-              <img src={day.lunch.image} width="120" />
-              <p>{day.lunch.name}</p>
-            </div>
+          <h3>🍛 Lunch</h3>
+          <ul>
+            {day.lunch.map((d, j) => (
+              <li key={j}>{d.name}</li>
+            ))}
+          </ul>
 
-            <div>
-              <h4>🌙 Dinner</h4>
-              <img src={day.dinner.image} width="120" />
-              <p>{day.dinner.name}</p>
-            </div>
-          </div>
+          <h3>🌙 Dinner</h3>
+          <ul>
+            {day.dinner.map((d, j) => (
+              <li key={j}>{d.name}</li>
+            ))}
+          </ul>
         </div>
       ))}
     </div>

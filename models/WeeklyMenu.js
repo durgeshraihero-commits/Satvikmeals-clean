@@ -6,17 +6,18 @@ const DishSchema = new mongoose.Schema({
 });
 
 const DaySchema = new mongoose.Schema({
-  date: String, // "2025-01-15"
-  lunch: DishSchema,
-  dinner: DishSchema
+  date: String,
+  lunch: [DishSchema],
+  dinner: [DishSchema]
 });
 
-const WeeklyMenuSchema = new mongoose.Schema({
-  weekStart: String, // "2025-01-13"
-  weekEnd: String,   // "2025-01-19"
-  days: [DaySchema],
-  published: { type: Boolean, default: true }
-}, { timestamps: true });
+const WeeklyMenuSchema = new mongoose.Schema(
+  {
+    days: [DaySchema],
+    published: { type: Boolean, default: false }
+  },
+  { timestamps: true }
+);
 
 export default mongoose.models.WeeklyMenu ||
   mongoose.model("WeeklyMenu", WeeklyMenuSchema);

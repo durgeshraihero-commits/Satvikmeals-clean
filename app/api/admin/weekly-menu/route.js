@@ -5,14 +5,13 @@ export async function POST(req) {
   await dbConnect();
   const body = await req.json();
 
-  await WeeklyMenu.deleteMany({}); // only ONE active planner
-  const menu = await WeeklyMenu.create(body);
+  // Only ONE active weekly menu
+  await WeeklyMenu.deleteMany({});
 
-  return Response.json(menu);
-}
+  const menu = await WeeklyMenu.create({
+    days: body.days,
+    published: true
+  });
 
-export async function GET() {
-  await dbConnect();
-  const menu = await WeeklyMenu.findOne({ published: true });
-  return Response.json(menu);
+  return Response.json({ success: true, menu });
 }
