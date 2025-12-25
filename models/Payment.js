@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const PaymentSchema = new mongoose.Schema(
   {
-    userEmail: String,
+    userEmail: { type: String, required: true },
     orderId: mongoose.Schema.Types.ObjectId,
     paymentId: String,
     amount: Number,

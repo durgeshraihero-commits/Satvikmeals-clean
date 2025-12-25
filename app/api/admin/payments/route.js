@@ -1,5 +1,6 @@
 import dbConnect from "@/lib/mongodb";
 import Payment from "@/models/Payment";
+import User from "@/models/User";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 
@@ -13,9 +14,14 @@ export async function GET() {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const userEmail = decoded.email;
 
-    const payments = await Payment.find({ userEmail })
+    // 🔐 Admin check
+    const admin = await User.findById(decoded.userId);
+    if (!admin || admin.role !== "admin") {
+      return Response.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const payments = await Payment.find({})
       .sort({ createdAt: -1 });
 
     return Response.json(payments);
@@ -23,7 +29,7 @@ export async function GET() {
   } catch (err) {
     console.error(err);
     return Response.json(
-      { error: "Failed to load payments" },
+      { error: "Failed to load admin payments" },
       { status: 500 }
     );
   }
