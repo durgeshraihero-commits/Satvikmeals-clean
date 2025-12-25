@@ -1,31 +1,47 @@
+import { NextResponse } from "next/server";
+import axios from "axios";
+import { getUserFromToken } from "@/lib/auth";
 import { PLANS } from "@/lib/plans";
 
-export async function GET(req) {
-  const { searchParams } = new URL(req.url);
-  const planId = searchParams.get("plan");
-
-  const plan = PLANS[planId];
-  if (!plan) {
-    return Response.json({ error: "Invalid plan" }, { status: 400 });
+export async function POST(req) {
+  const user = getUserFromToken();
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const payload = {
-    purpose: plan.name,
-    amount: plan.price,
-    buyer_name: "SatvikMeals User",
-    redirect_url: `${process.env.NEXT_PUBLIC_URL}/api/payment/success?plan=${planId}`,
-  };
+  const { planId } = await req.json();
+  const plan = PLANS[planId];
 
-  const res = await fetch("https://www.instamojo.com/api/1.1/payment-requests/", {
-    method: "POST",
-    headers: {
-      "X-Api-Key": process.env.INSTAMOJO_API_KEY,
-      "X-Auth-Token": process.env.INSTAMOJO_AUTH_TOKEN,
-      "Content-Type": "application/json",
+  if (!plan) {
+    return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
+  }
+
+  const res = await axios.post(
+    "https://www.instamojo.com/api/1.1/payment-requests/",
+    {
+      purpose: plan.name,
+      amount: plan.price,
+      buyer_name: user.name || user.email,
+      email: user.email,
+      redirect_url: `${process.env.BASE_URL}/api/payment/success`,
     },
-    body: JSON.stringify(payload),
-  });
+    {
+      headers: {
+        "X-Api-Key": process.env.INSTAMOJO_API_KEY,
+        "X-Auth-Token": process.env.INSTAMOJO_AUTH_TOKEN,
+      },
+    }
+  );
 
-  const data = await res.json();
-  return Response.redirect(data.payment_request.longurl);
+  // ✅ THIS WAS THE BUG
+  const longurl = res.data?.payment_request?.longurl;
+
+  if (!longurl) {
+    return NextResponse.json(
+      { error: "Instamojo URL not received" },
+      { status: 500 }
+    );
+  }
+
+  return NextResponse.json({ url: longurl });
 }

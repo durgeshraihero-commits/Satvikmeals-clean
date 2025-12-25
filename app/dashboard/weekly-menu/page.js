@@ -11,7 +11,7 @@ export default function WeeklyMenuPage() {
   }, []);
 
   if (!menu || menu.published === false) {
-    return <h2>🍽 Weekly menu not published yet</h2>;
+    return <h3>🍽 Weekly menu not published yet</h3>;
   }
 
   return (
@@ -20,12 +20,12 @@ export default function WeeklyMenuPage() {
 
       {menu.days.map((day, i) => (
         <div key={i} className="info-box">
-          <h3>{day.date}</h3>
+          <h3>📅 {day.date}</h3>
 
           <h4>🌞 Lunch</h4>
           {day.lunch.map((d, j) => (
             <div key={j}>
-              <img src={d.image} width="80" />
+              {d.image && <img src={d.image} width="100" />}
               <p>{d.name}</p>
             </div>
           ))}
@@ -33,7 +33,7 @@ export default function WeeklyMenuPage() {
           <h4>🌙 Dinner</h4>
           {day.dinner.map((d, j) => (
             <div key={j}>
-              <img src={d.image} width="80" />
+              {d.image && <img src={d.image} width="100" />}
               <p>{d.name}</p>
             </div>
           ))}
