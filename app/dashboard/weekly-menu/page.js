@@ -10,22 +10,22 @@ export default function WeeklyMenuPage() {
       .then(setMenu);
   }, []);
 
-  if (!menu) {
-    return <p>🍽 Weekly menu not published yet</p>;
+  if (!menu || menu.published === false) {
+    return <h2>🍽 Weekly menu not published yet</h2>;
   }
 
   return (
     <div>
-      <h2>🍱 Weekly Meal Planner</h2>
+      <h2>🍱 Weekly Menu</h2>
 
       {menu.days.map((day, i) => (
-        <div key={i}>
+        <div key={i} className="info-box">
           <h3>{day.date}</h3>
 
           <h4>🌞 Lunch</h4>
           {day.lunch.map((d, j) => (
             <div key={j}>
-              <img src={d.image} width="100" />
+              <img src={d.image} width="80" />
               <p>{d.name}</p>
             </div>
           ))}
@@ -33,7 +33,7 @@ export default function WeeklyMenuPage() {
           <h4>🌙 Dinner</h4>
           {day.dinner.map((d, j) => (
             <div key={j}>
-              <img src={d.image} width="100" />
+              <img src={d.image} width="80" />
               <p>{d.name}</p>
             </div>
           ))}

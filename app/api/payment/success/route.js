@@ -1,36 +1,29 @@
 import dbConnect from "@/lib/mongodb";
 import Subscription from "@/models/Subscription";
 import { PLANS } from "@/lib/plans";
-import { cookies } from "next/headers";
-import jwt from "jsonwebtoken";
 
 export async function GET(req) {
   await dbConnect();
 
   const { searchParams } = new URL(req.url);
-  const planId = searchParams.get("plan");
-  const plan = PLANS[planId];
+  const email = searchParams.get("email");
+  const planKey = searchParams.get("plan");
 
-  if (!plan) {
-    return Response.redirect("/");
-  }
+  const plan = PLANS[planKey];
+  if (!plan) return Response.redirect("/subscribe");
 
-  const token = cookies().get("token")?.value;
-  const user = jwt.verify(token, process.env.JWT_SECRET);
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + plan.durationDays);
 
-  const start = new Date();
-  const end = new Date();
-  end.setDate(end.getDate() + plan.durationDays);
-
-  await Subscription.create({
-    email: user.email,
-    plan: plan.name,
-    startDate: start,
-    endDate: end,
-    active: true,
-  });
-
-  return Response.redirect(
-    `${process.env.NEXT_PUBLIC_URL}/dashboard/subscription`
+  await Subscription.findOneAndUpdate(
+    { email },
+    {
+      email,
+      plan: plan.name,
+      expiresAt,
+    },
+    { upsert: true }
   );
+
+  return Response.redirect("/dashboard/subscription");
 }
