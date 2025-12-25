@@ -1,49 +1,22 @@
 "use client";
-
-import { useRouter } from "next/navigation";
+import { PLANS } from "@/lib/plans";
 
 export default function SubscribePage() {
-  const router = useRouter();
-
-  async function requireLogin(nextPath) {
-    const res = await fetch("/api/auth/me");
-    const data = await res.json();
-
-    if (!data.user) {
-      router.push("/login");
-      return;
-    }
-
-    router.push(nextPath);
+  function pay(planId) {
+    window.location.href = `/api/instamojo/create?plan=${planId}`;
   }
 
   return (
-    <div style={{ padding: 20 }}>
-      <h1>Choose Your Meal Plan</h1>
+    <div className="dashboard-section">
+      <h2>🍽 Choose Your Plan</h2>
 
-      <div className="plan-card">
-        <h3>Daily Meal</h3>
-        <p>₹59 / meal</p>
-        <button onClick={() => requireLogin("/order/daily")}>
-          Order Today
-        </button>
-      </div>
-
-      <div className="plan-card">
-        <h3>1 Month Plan</h3>
-        <p>₹3099</p>
-        <button onClick={() => requireLogin("/payment/subscribe?plan=1")}>
-          Subscribe Now
-        </button>
-      </div>
-
-      <div className="plan-card">
-        <h3>2 Month Plan</h3>
-        <p>₹5999</p>
-        <button onClick={() => requireLogin("/payment/subscribe?plan=2")}>
-          Subscribe Now
-        </button>
-      </div>
+      {Object.entries(PLANS).map(([id, p]) => (
+        <div key={id} className="info-box">
+          <h3>{p.name}</h3>
+          <p>₹{p.price}</p>
+          <button onClick={() => pay(id)}>Pay Now</button>
+        </div>
+      ))}
     </div>
   );
 }

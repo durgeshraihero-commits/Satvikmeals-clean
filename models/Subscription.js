@@ -1,12 +1,11 @@
 import mongoose from "mongoose";
 
 const SubscriptionSchema = new mongoose.Schema({
-  userId: String,
+  email: String,
   plan: String,
-  price: Number,
   startDate: Date,
   endDate: Date,
-  status: String
+  active: Boolean,
 });
 
 export default mongoose.models.Subscription ||

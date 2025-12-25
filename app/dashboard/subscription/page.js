@@ -6,19 +6,24 @@ export default function SubscriptionPage() {
 
   useEffect(() => {
     fetch("/api/subscription/me")
-      .then(r => r.json())
+      .then(res => res.json())
       .then(setSub);
   }, []);
 
-  if (!sub) return <p>Loading...</p>;
-  if (!sub.plan) return <p>No active subscription</p>;
+  if (!sub) {
+    return (
+      <div>
+        <h2>No Active Subscription</h2>
+        <a href="/subscribe">Subscribe Now</a>
+      </div>
+    );
+  }
 
   return (
-    <div className="dashboard-section">
-      <h2>📦 My Subscription</h2>
-      <p><b>Plan:</b> {sub.plan}</p>
-      <p><b>Price:</b> ₹{sub.price}</p>
-      <p><b>Status:</b> {sub.status}</p>
+    <div>
+      <h2>✅ Active Subscription</h2>
+      <p>{sub.plan}</p>
+      <p>Valid till {new Date(sub.endDate).toDateString()}</p>
     </div>
   );
 }
