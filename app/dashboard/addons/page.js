@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState } from "react";
 
 export default function AddonsPage() {
@@ -18,7 +17,22 @@ export default function AddonsPage() {
 
       {addons.map(a => (
         <div key={a._id} className="info-box">
+          {a.image && (
+            <img
+              src={a.image}
+              alt={a.name}
+              style={{ width: "100%", height: 120, objectFit: "cover", borderRadius: 8 }}
+            />
+          )}
+
           <h3>{a.name}</h3>
+
+          {a.description && (
+            <p style={{ fontSize: 14, color: "#555" }}>
+              {a.description}
+            </p>
+          )}
+
           <strong>₹{a.price}</strong>
 
           <button
@@ -31,8 +45,8 @@ export default function AddonsPage() {
                   itemId: a._id,
                   name: a.name,
                   price: a.price,
-                  image: a.image || ""
-                })
+                  image: a.image,
+                }),
               })
             }
           >

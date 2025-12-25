@@ -72,16 +72,61 @@ export default function CartPage() {
     <div style={{ maxWidth: 420, margin: "auto", padding: 16 }}>
       <h2>🛒 Your Cart</h2>
 
-      {cart.items.map(item => (
-        <div key={item.itemId} style={{ padding: 12, border: "1px solid #ddd", marginBottom: 10 }}>
-          <strong>{item.name}</strong>
-          <p>₹{item.price} × {item.quantity}</p>
+{cart.items.map(item => (
+  <div
+    key={item.itemId}
+    style={{
+      display: "flex",
+      gap: 12,
+      padding: 12,
+      border: "1px solid #ddd",
+      borderRadius: 10,
+      marginBottom: 12,
+    }}
+  >
+    {/* IMAGE */}
+    {item.image && (
+      <img
+        src={item.image}
+        alt={item.name}
+        style={{
+          width: 70,
+          height: 70,
+          objectFit: "cover",
+          borderRadius: 8,
+        }}
+      />
+    )}
 
-          <button onClick={() => updateQty(item.itemId, "dec")}>−</button>
-          <button onClick={() => updateQty(item.itemId, "inc")}>+</button>
-        </div>
-      ))}
+    {/* DETAILS */}
+    <div style={{ flex: 1 }}>
+      <strong>{item.name}</strong>
+      <p style={{ margin: "4px 0" }}>
+        ₹{item.price} × {item.quantity}
+      </p>
 
+      <div style={{ display: "flex", gap: 8 }}>
+        <button onClick={() => updateQty(item.itemId, "dec")}>−</button>
+        <button onClick={() => updateQty(item.itemId, "inc")}>+</button>
+
+        {/* ❌ DELETE COMPLETELY */}
+        <button
+          style={{ color: "red" }}
+          onClick={async () => {
+            const res = await fetch("/api/cart", {
+              method: "DELETE",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ itemId: item.itemId }),
+            });
+            setCart(await res.json());
+          }}
+        >
+          ❌ Remove
+        </button>
+      </div>
+    </div>
+  </div>
+))}
       <button onClick={proceedToInstamojo}>
         Pay Online
       </button>

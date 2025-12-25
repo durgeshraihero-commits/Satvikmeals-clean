@@ -49,3 +49,16 @@ export async function PATCH(req) {
 
   return Response.json(cart);
 }
+
+export async function DELETE(req) {
+  await dbConnect();
+  const { itemId } = await req.json();
+
+  const cart = await Cart.findOne({ userEmail: USER_EMAIL });
+  if (!cart) return Response.json({ items: [] });
+
+  cart.items = cart.items.filter(i => i.itemId !== itemId);
+
+  await cart.save();
+  return Response.json(cart);
+}

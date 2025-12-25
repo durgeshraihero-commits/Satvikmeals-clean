@@ -3,27 +3,44 @@ import { useEffect, useState } from "react";
 
 export default function AdminAddons() {
   const [addons, setAddons] = useState([]);
-  const [name, setName] = useState("");
-  const [price, setPrice] = useState("");
+  const [form, setForm] = useState({
+    name: "",
+    price: "",
+    description: "",
+    image: "",
+  });
 
   async function load() {
     const res = await fetch("/api/admin/addons");
     setAddons(await res.json());
   }
 
+  function handleImage(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setForm({ ...form, image: reader.result });
+    };
+    reader.readAsDataURL(file);
+  }
+
   async function addAddon() {
     await fetch("/api/admin/addons", {
       method: "POST",
-      body: JSON.stringify({ name, price }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
     });
-    setName("");
-    setPrice("");
+
+    setForm({ name: "", price: "", description: "", image: "" });
     load();
   }
 
   async function remove(id) {
     await fetch("/api/admin/addons", {
       method: "DELETE",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
     });
     load();
@@ -35,13 +52,34 @@ export default function AdminAddons() {
     <div className="dashboard-section">
       <h2>➕ Manage Add-ons</h2>
 
-      <input placeholder="Item name" value={name} onChange={e=>setName(e.target.value)} />
-      <input placeholder="Price" value={price} onChange={e=>setPrice(e.target.value)} />
-      <button onClick={addAddon}>Add</button>
+      <input
+        placeholder="Item name"
+        value={form.name}
+        onChange={e => setForm({ ...form, name: e.target.value })}
+      />
+
+      <input
+        placeholder="Price"
+        type="number"
+        value={form.price}
+        onChange={e => setForm({ ...form, price: e.target.value })}
+      />
+
+      <textarea
+        placeholder="Description"
+        value={form.description}
+        onChange={e => setForm({ ...form, description: e.target.value })}
+      />
+
+      <input type="file" accept="image/*" onChange={handleImage} />
+
+      <button onClick={addAddon}>➕ Add Add-on</button>
+
+      <hr />
 
       {addons.map(a => (
-        <div key={a._id}>
-          {a.name} ₹{a.price}
+        <div key={a._id} style={{ marginBottom: 10 }}>
+          <strong>{a.name}</strong> – ₹{a.price}
           <button onClick={() => remove(a._id)}>❌</button>
         </div>
       ))}

@@ -1,18 +1,27 @@
 import mongoose from "mongoose";
 
-const AddonSchema = new mongoose.Schema(
-  {
-    name: String,
-    price: Number,
-    image: String,
-    description: String,
-    available: {
-      type: Boolean,
-      default: true, // ✅ REQUIRED
-    },
+const AddonSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
   },
-  { timestamps: true }
-);
+  price: {
+    type: Number,
+    required: true,
+  },
+  description: {
+    type: String,
+    default: "",
+  },
+  image: {
+    type: String,
+    default: "",
+  },
+  available: {
+    type: Boolean,
+    default: true,
+  },
+}, { timestamps: true });
 
 export default mongoose.models.Addon ||
   mongoose.model("Addon", AddonSchema);

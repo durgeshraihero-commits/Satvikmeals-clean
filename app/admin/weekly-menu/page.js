@@ -1,57 +1,55 @@
 "use client";
-
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function AdminWeeklyMenu() {
-  const [days, setDays] = useState([
-    {
-      date: "",
-      lunch: { name: "", image: "" },
-      dinner: { name: "", image: "" }
-    }
-  ]);
+  const [days, setDays] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  function handleImage(e, dayIndex, type) {
+  useEffect(() => {
+    fetch("/api/admin/weekly-menu")
+      .then(res => res.json())
+      .then(data => {
+        if (data?.days) setDays(data.days);
+        setLoading(false);
+      });
+  }, []);
+
+  function handleImage(e, index, type) {
     const file = e.target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
     reader.onloadend = () => {
       const updated = [...days];
-      updated[dayIndex][type].image = reader.result;
+      updated[index][type].image = reader.result;
       setDays(updated);
     };
     reader.readAsDataURL(file);
   }
 
   async function publishMenu() {
-    const res = await fetch("/api/admin/weekly-menu", {
+    await fetch("/api/admin/weekly-menu", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ days })
+      body: JSON.stringify({ days }),
     });
-
-    if (res.ok) {
-      alert("✅ Weekly menu published");
-    } else {
-      alert("❌ Failed to publish menu");
-    }
+    alert("✅ Menu published");
   }
+
+  async function deleteMenu() {
+    await fetch("/api/admin/weekly-menu", { method: "DELETE" });
+    setDays([]);
+    alert("🗑 Menu deleted");
+  }
+
+  if (loading) return <p>Loading...</p>;
 
   return (
     <div style={{ padding: 20 }}>
-      <h1>🧑‍🍳 Admin – Weekly Menu</h1>
+      <h1>🧑‍🍳 Weekly Menu Manager</h1>
 
       {days.map((day, index) => (
-        <div
-          key={index}
-          style={{
-            background: "#fff",
-            padding: 16,
-            marginTop: 20,
-            borderRadius: 12
-          }}
-        >
+        <div key={index} style={{ background: "#fff", padding: 16, marginTop: 16 }}>
           <input
             type="date"
             value={day.date}
@@ -62,10 +60,10 @@ export default function AdminWeeklyMenu() {
             }}
           />
 
-          <h3>🌞 Lunch</h3>
+          <h4>🌞 Lunch</h4>
           <input
-            placeholder="Lunch dish name"
             value={day.lunch.name}
+            placeholder="Lunch name"
             onChange={e => {
               const updated = [...days];
               updated[index].lunch.name = e.target.value;
@@ -74,10 +72,10 @@ export default function AdminWeeklyMenu() {
           />
           <input type="file" onChange={e => handleImage(e, index, "lunch")} />
 
-          <h3>🌙 Dinner</h3>
+          <h4>🌙 Dinner</h4>
           <input
-            placeholder="Dinner dish name"
             value={day.dinner.name}
+            placeholder="Dinner name"
             onChange={e => {
               const updated = [...days];
               updated[index].dinner.name = e.target.value;
@@ -88,18 +86,12 @@ export default function AdminWeeklyMenu() {
         </div>
       ))}
 
-      <button
-        style={{
-          marginTop: 30,
-          padding: 12,
-          background: "#16a34a",
-          color: "#fff",
-          border: "none",
-          borderRadius: 8
-        }}
-        onClick={publishMenu}
-      >
-        ✅ Publish Weekly Menu
+      <button onClick={publishMenu} style={{ marginTop: 20 }}>
+        ✅ Save / Update Menu
+      </button>
+
+      <button onClick={deleteMenu} style={{ marginLeft: 10, color: "red" }}>
+        🗑 Delete Menu
       </button>
     </div>
   );

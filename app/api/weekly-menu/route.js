@@ -5,5 +5,10 @@ export async function GET() {
   await dbConnect();
 
   const menu = await WeeklyMenu.findOne({ published: true });
-  return Response.json(menu || {});
+
+  if (!menu) {
+    return Response.json({ days: [] });
+  }
+
+  return Response.json(menu);
 }
