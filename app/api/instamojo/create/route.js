@@ -13,15 +13,17 @@ export async function POST(req) {
 
     const payload = {
       purpose: plan.name,
-      amount: plan.price,
+      amount: plan.price.toString(),
       buyer_name: "SatvikMeals User",
-      email: "test@example.com", // Instamojo requires email
-      phone: "9999999999",        // Instamojo requires phone
+      email: "customer@test.com",
+      phone: "9999999999",
       redirect_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/success`,
+      allow_repeated_payments: false,
       send_email: false,
       send_sms: false,
-      allow_repeated_payments: false,
     };
+
+    console.log("📤 Instamojo payload:", payload);
 
     const response = await axios.post(
       "https://www.instamojo.com/api/1.1/payment-requests/",
@@ -30,21 +32,26 @@ export async function POST(req) {
         headers: {
           "X-Api-Key": process.env.INSTAMOJO_API_KEY,
           "X-Auth-Token": process.env.INSTAMOJO_AUTH_TOKEN,
+          "Content-Type": "application/x-www-form-urlencoded",
         },
       }
     );
 
-    const longurl = response.data?.payment_request?.longurl;
+    console.log("📥 Instamojo response:", response.data);
 
-    if (!longurl) {
-      console.error("Instamojo response:", response.data);
-      return NextResponse.json({ error: "Instamojo failed" }, { status: 500 });
+    if (!response.data.success) {
+      return NextResponse.json(
+        { error: response.data.message },
+        { status: 500 }
+      );
     }
+
+    const longurl = response.data.payment_request.longurl;
 
     return NextResponse.json({ url: longurl });
 
   } catch (err) {
-    console.error("Instamojo error:", err.response?.data || err.message);
+    console.error("❌ Instamojo ERROR:", err.response?.data || err.message);
     return NextResponse.json({ error: "Payment failed" }, { status: 500 });
   }
 }
