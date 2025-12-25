@@ -5,10 +5,11 @@ import Payment from "@/models/Payment";
 
 export async function POST(req) {
   await dbConnect();
-  const { paymentId, paymentStatus, email } = await req.json();
 
-  if (!paymentId || !email) {
-    return Response.json({ error: "Missing info" }, { status: 400 });
+  const { paymentId, paymentStatus, email, amount } = await req.json();
+
+  if (!paymentId || !paymentStatus || !email) {
+    return Response.json({ error: "Missing payment info" }, { status: 400 });
   }
 
   const cart = await Cart.findOne({ userEmail: email });
@@ -16,29 +17,31 @@ export async function POST(req) {
     return Response.json({ error: "Cart empty" }, { status: 400 });
   }
 
-  const total = cart.items.reduce(
-    (s, i) => s + i.price * i.quantity,
-    0
-  );
+  const totalAmount =
+    amount ??
+    cart.items.reduce((s, i) => s + i.price * i.quantity, 0);
 
-  await Order.create({
+  // SAVE ORDER
+  const order = await Order.create({
     userEmail: email,
     items: cart.items,
-    totalAmount: total,
+    totalAmount,
     paymentId,
-    paymentStatus
+    paymentStatus,
+    paymentMethod: "online"
   });
 
+  // SAVE PAYMENT
   await Payment.create({
     userEmail: email,
     paymentId,
-    amount: total,
-    status: paymentStatus,
-    method: "online"
+    amount: totalAmount,
+    status: paymentStatus
   });
 
+  // CLEAR CART
   cart.items = [];
   await cart.save();
 
-  return Response.json({ success: true });
+  return Response.json({ success: true, order });
 }
