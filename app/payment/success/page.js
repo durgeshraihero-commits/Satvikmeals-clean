@@ -1,34 +1,57 @@
 "use client";
 
-import { useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 
-export default function PaymentSuccess() {
+export default function PaymentSuccessPage() {
   const params = useSearchParams();
+  const router = useRouter();
+
+  const paymentId = params.get("payment_id");
+  const paymentStatus = params.get("payment_status");
+
+  const [status, setStatus] = useState("Saving your order...");
 
   useEffect(() => {
-    const paymentId = params.get("payment_id");
-    const paymentStatus = params.get("payment_status");
-    const email = localStorage.getItem("userEmail");
+    async function saveOrder() {
+      if (!paymentId || paymentStatus !== "Credit") {
+        setStatus("Payment failed or cancelled");
+        return;
+      }
 
-    if (!paymentId || paymentStatus !== "Credit" || !email) return;
+      try {
+        const res = await fetch("/api/orders/save", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            paymentId,
+            paymentStatus: "Credit"
+          })
+        });
 
-    fetch("/api/orders/save", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        paymentId,
-        paymentStatus,
-        email
-      })
-    });
-  }, []);
+        const data = await res.json();
+
+        if (!res.ok) {
+          setStatus(data.error || "Failed to save order");
+          return;
+        }
+
+        setStatus("✅ Order placed successfully!");
+        setTimeout(() => router.push("/dashboard/orders"), 2000);
+
+      } catch (err) {
+        console.error(err);
+        setStatus("Something went wrong");
+      }
+    }
+
+    saveOrder();
+  }, [paymentId, paymentStatus]);
 
   return (
-    <div style={{ padding: 40, textAlign: "center" }}>
-      <h2>✅ Payment Successful</h2>
-      <p>Your order has been placed.</p>
-      <a href="/orders">View Orders</a>
+    <div style={{ padding: 30, textAlign: "center" }}>
+      <h2>{status}</h2>
+      <p>Please do not refresh this page.</p>
     </div>
   );
 }

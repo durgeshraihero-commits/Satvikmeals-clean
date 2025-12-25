@@ -2,11 +2,12 @@ import mongoose from "mongoose";
 
 const PaymentSchema = new mongoose.Schema(
   {
-    userEmail: { type: String, required: true },
-    paymentId: { type: String, required: true },
+    userEmail: String,
+    orderId: mongoose.Schema.Types.ObjectId,
+    paymentId: String,
     amount: Number,
     status: String,
-    method: { type: String, default: "Instamojo" }
+    method: String
   },
   { timestamps: true }
 );
