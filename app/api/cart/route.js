@@ -1,11 +1,18 @@
 import dbConnect from "@/lib/mongodb";
 import Cart from "@/models/Cart";
+import { getUserFromToken } from "@/lib/auth";
 
-export async function GET(req) {
+export const dynamic = "force-dynamic";
+
+function getEmail() {
+  const user = getUserFromToken();
+  if (!user?.email) throw new Error("Unauthorized");
+  return user.email;
+}
+
+export async function GET() {
   await dbConnect();
-
-  const email = req.nextUrl.searchParams.get("email");
-  if (!email) return Response.json({ items: [] });
+  const email = getEmail();
 
   let cart = await Cart.findOne({ userEmail: email });
   if (!cart) {
@@ -17,15 +24,27 @@ export async function GET(req) {
 
 export async function POST(req) {
   await dbConnect();
+  const email = getEmail();
   const body = await req.json();
-  const { email, itemId, name, price, image } = body;
 
   let cart = await Cart.findOne({ userEmail: email });
-  if (!cart) cart = await Cart.create({ userEmail: email, items: [] });
+  if (!cart) {
+    cart = await Cart.create({ userEmail: email, items: [] });
+  }
 
-  const item = cart.items.find(i => i.itemId === itemId);
-  if (item) item.quantity += 1;
-  else cart.items.push({ itemId, name, price, image, quantity: 1 });
+  const index = cart.items.findIndex(i => i.itemId === body.itemId);
+
+  if (index > -1) {
+    cart.items[index].quantity += 1;
+  } else {
+    cart.items.push({
+      itemId: body.itemId,
+      name: body.name,
+      price: body.price,
+      image: body.image || "",
+      quantity: 1,
+    });
+  }
 
   await cart.save();
   return Response.json(cart);
@@ -33,7 +52,8 @@ export async function POST(req) {
 
 export async function PATCH(req) {
   await dbConnect();
-  const { email, itemId, action } = await req.json();
+  const email = getEmail();
+  const { itemId, action } = await req.json();
 
   const cart = await Cart.findOne({ userEmail: email });
   if (!cart) return Response.json({ items: [] });
@@ -52,13 +72,14 @@ export async function PATCH(req) {
 
 export async function DELETE(req) {
   await dbConnect();
+  const email = getEmail();
   const { itemId } = await req.json();
 
-  const cart = await Cart.findOne({ userEmail: USER_EMAIL });
+  const cart = await Cart.findOne({ userEmail: email });
   if (!cart) return Response.json({ items: [] });
 
   cart.items = cart.items.filter(i => i.itemId !== itemId);
-
   await cart.save();
+
   return Response.json(cart);
 }

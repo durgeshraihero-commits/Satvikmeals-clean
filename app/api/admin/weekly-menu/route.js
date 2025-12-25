@@ -1,29 +1,37 @@
 import dbConnect from "@/lib/mongodb";
 import WeeklyMenu from "@/models/WeeklyMenu";
+import { getUserFromToken } from "@/lib/auth";
 
-export async function POST(req) {
-  await dbConnect();
-  const body = await req.json();
-
-  // ❗ Only ONE weekly menu allowed
-  await WeeklyMenu.deleteMany({});
-
-  const menu = await WeeklyMenu.create({
-    days: body.days,
-    published: true,
-  });
-
-  return Response.json(menu);
-}
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   await dbConnect();
-  const menu = await WeeklyMenu.findOne({});
+  return Response.json(await WeeklyMenu.find().sort({ createdAt: -1 }));
+}
+
+export async function POST(req) {
+  await dbConnect();
+  const user = getUserFromToken();
+  if (user?.role !== "admin")
+    return Response.json({ error: "Forbidden" }, { status: 403 });
+
+  const body = await req.json();
+
+  // unpublish old menu
+  await WeeklyMenu.updateMany({}, { published: false });
+
+  const menu = await WeeklyMenu.create({ ...body, published: true });
   return Response.json(menu);
 }
 
-export async function DELETE() {
+export async function DELETE(req) {
   await dbConnect();
-  await WeeklyMenu.deleteMany({});
+  const user = getUserFromToken();
+  if (user?.role !== "admin")
+    return Response.json({ error: "Forbidden" }, { status: 403 });
+
+  const { id } = await req.json();
+  await WeeklyMenu.findByIdAndDelete(id);
+
   return Response.json({ success: true });
 }
