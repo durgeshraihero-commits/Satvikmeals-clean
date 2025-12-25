@@ -1,86 +1,40 @@
 "use client";
-
 import { useEffect, useState } from "react";
 
-export default function UserMenuPage() {
+export default function WeeklyMenuPage() {
   const [menu, setMenu] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
 
   useEffect(() => {
-    async function loadMenu() {
-      try {
-        const res = await fetch("/api/menu");
-        const data = await res.json();
-
-        if (!res.ok || data.error) {
-          setError(data.error || "Failed to load menu");
-        } else {
-          setMenu(data);
-        }
-      } catch (err) {
-        setError("Failed to load menu");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadMenu();
+    fetch("/api/admin/weekly-menu")
+      .then(res => res.json())
+      .then(setMenu);
   }, []);
 
-  if (loading) return <p style={{ padding: 20 }}>Loading menu…</p>;
-  if (error) return <p style={{ padding: 20, color: "red" }}>{error}</p>;
+  if (!menu) return <p>Loading weekly menu...</p>;
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2>🍱 Today’s Menu</h2>
+    <div style={{ padding: 16 }}>
+      <h2>📅 Weekly Meal Planner</h2>
 
-      {!menu?.items?.length && <p>No menu published yet</p>}
+      {menu.days.map(day => (
+        <div key={day.date} style={{ marginBottom: 20 }}>
+          <h3>{day.date}</h3>
 
-      <div style={{ display: "grid", gap: 20 }}>
-        {menu.items.map(item => (
-          <div
-            key={item._id}
-            style={{
-              padding: 16,
-              border: "1px solid #ddd",
-              borderRadius: 10
-            }}
-          >
-            {item.image && (
-              <img
-                src={item.image}
-                alt={item.name}
-                style={{ width: "100%", borderRadius: 8 }}
-              />
-            )}
+          <div style={{ display: "flex", gap: 12 }}>
+            <div>
+              <h4>🌞 Lunch</h4>
+              <img src={day.lunch.image} width="120" />
+              <p>{day.lunch.name}</p>
+            </div>
 
-            <h3>{item.name}</h3>
-            <p>{item.description}</p>
-            <strong>₹{item.price}</strong>
-
-            <button
-              style={{ marginTop: 10 }}
-              onClick={async () => {
-                await fetch("/api/cart", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    itemId: item._id,
-                    name: item.name,
-                    price: item.price,
-                    image: item.image || ""
-                  })
-                });
-
-                alert("✅ Added to cart");
-              }}
-            >
-              🛒 Add to Cart
-            </button>
+            <div>
+              <h4>🌙 Dinner</h4>
+              <img src={day.dinner.image} width="120" />
+              <p>{day.dinner.name}</p>
+            </div>
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   );
 }
