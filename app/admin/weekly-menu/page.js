@@ -3,82 +3,104 @@
 import { useState } from "react";
 
 export default function AdminWeeklyMenu() {
-  const [days, setDays] = useState([]);
+  const [days, setDays] = useState([
+    {
+      date: "",
+      lunch: { name: "", image: "" },
+      dinner: { name: "", image: "" }
+    }
+  ]);
 
-  function addDay() {
-    setDays([
-      ...days,
-      { date: "", lunch: [], dinner: [] }
-    ]);
-  }
+  function handleImage(e, dayIndex, type) {
+    const file = e.target.files[0];
+    if (!file) return;
 
-  function addDish(dayIndex, type) {
-    const copy = [...days];
-    copy[dayIndex][type].push({ name: "", image: "" });
-    setDays(copy);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const updated = [...days];
+      updated[dayIndex][type].image = reader.result;
+      setDays(updated);
+    };
+    reader.readAsDataURL(file);
   }
 
   async function publishMenu() {
-    await fetch("/api/admin/weekly-menu", {
+    const res = await fetch("/api/admin/weekly-menu", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ days })
     });
 
-    alert("Weekly Menu Published ✅");
+    if (res.ok) {
+      alert("✅ Weekly menu published");
+    } else {
+      alert("❌ Failed to publish menu");
+    }
   }
 
   return (
     <div style={{ padding: 20 }}>
-      <h1>📅 Weekly Meal Planner</h1>
+      <h1>🧑‍🍳 Admin – Weekly Menu</h1>
 
-      {days.map((day, i) => (
-        <div key={i} style={{ border: "1px solid #ccc", padding: 10, marginBottom: 12 }}>
+      {days.map((day, index) => (
+        <div
+          key={index}
+          style={{
+            background: "#fff",
+            padding: 16,
+            marginTop: 20,
+            borderRadius: 12
+          }}
+        >
           <input
-            placeholder="Date (e.g. Mon 25 Dec)"
+            type="date"
             value={day.date}
             onChange={e => {
-              const copy = [...days];
-              copy[i].date = e.target.value;
-              setDays(copy);
+              const updated = [...days];
+              updated[index].date = e.target.value;
+              setDays(updated);
             }}
           />
 
-          <h4>🍛 Lunch</h4>
-          {day.lunch.map((d, j) => (
-            <input
-              key={j}
-              placeholder="Dish name"
-              value={d.name}
-              onChange={e => {
-                const copy = [...days];
-                copy[i].lunch[j].name = e.target.value;
-                setDays(copy);
-              }}
-            />
-          ))}
-          <button onClick={() => addDish(i, "lunch")}>+ Add Lunch Dish</button>
+          <h3>🌞 Lunch</h3>
+          <input
+            placeholder="Lunch dish name"
+            value={day.lunch.name}
+            onChange={e => {
+              const updated = [...days];
+              updated[index].lunch.name = e.target.value;
+              setDays(updated);
+            }}
+          />
+          <input type="file" onChange={e => handleImage(e, index, "lunch")} />
 
-          <h4>🌙 Dinner</h4>
-          {day.dinner.map((d, j) => (
-            <input
-              key={j}
-              placeholder="Dish name"
-              value={d.name}
-              onChange={e => {
-                const copy = [...days];
-                copy[i].dinner[j].name = e.target.value;
-                setDays(copy);
-              }}
-            />
-          ))}
-          <button onClick={() => addDish(i, "dinner")}>+ Add Dinner Dish</button>
+          <h3>🌙 Dinner</h3>
+          <input
+            placeholder="Dinner dish name"
+            value={day.dinner.name}
+            onChange={e => {
+              const updated = [...days];
+              updated[index].dinner.name = e.target.value;
+              setDays(updated);
+            }}
+          />
+          <input type="file" onChange={e => handleImage(e, index, "dinner")} />
         </div>
       ))}
 
-      <button onClick={addDay}>➕ Add Day</button>
-      <br /><br />
-      <button onClick={publishMenu}>✅ Publish Weekly Menu</button>
+      <button
+        style={{
+          marginTop: 30,
+          padding: 12,
+          background: "#16a34a",
+          color: "#fff",
+          border: "none",
+          borderRadius: 8
+        }}
+        onClick={publishMenu}
+      >
+        ✅ Publish Weekly Menu
+      </button>
     </div>
   );
 }
