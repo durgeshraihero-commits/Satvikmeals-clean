@@ -11,6 +11,9 @@ export async function GET(req) {
     return Response.json([]);
   }
 
-  const orders = await Order.find({ userEmail: email }).sort({ createdAt: -1 });
+  const orders = await Order.find({ userEmail: email }).sort({
+    createdAt: -1,
+  });
+
   return Response.json(orders);
 }

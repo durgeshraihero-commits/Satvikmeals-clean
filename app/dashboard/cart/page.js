@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 export default function CartPage() {
   const [cart, setCart] = useState(null);
+
   const userEmail = "durgeshrai214@gmail.com"; // TEMP
 
   useEffect(() => {
@@ -29,11 +30,34 @@ export default function CartPage() {
         <div key={i.itemId} className="info-box">
           <strong>{i.name}</strong>
           <p>₹{i.price} × {i.quantity}</p>
+
+          <button
+            onClick={async () => {
+              const res = await fetch("/api/cart", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  email: userEmail,
+                  itemId: i.itemId,
+                  action: "dec"
+                })
+              });
+
+              setCart(await res.json());
+            }}
+          >
+            ❌ Remove
+          </button>
         </div>
       ))}
 
       {cart.items.length > 0 && (
-        <h3>Total: ₹{total}</h3>
+        <>
+          <h3>Total: ₹{total}</h3>
+          <button style={{ marginTop: 10 }}>
+            ✅ Proceed to Checkout
+          </button>
+        </>
       )}
     </div>
   );

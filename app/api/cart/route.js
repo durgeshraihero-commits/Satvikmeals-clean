@@ -1,5 +1,5 @@
-import dbConnect from "../../../lib/mongodb";
-import Cart from "../../../models/Cart";
+import dbConnect from "@/lib/mongodb";
+import Cart from "@/models/Cart";
 
 export async function GET(req) {
   await dbConnect();
@@ -8,7 +8,7 @@ export async function GET(req) {
   const email = searchParams.get("email");
 
   if (!email) {
-    return Response.json({ error: "Email required" }, { status: 400 });
+    return Response.json({ items: [] });
   }
 
   let cart = await Cart.findOne({ userEmail: email });
@@ -30,7 +30,10 @@ export async function POST(req) {
   const { email, itemId, name, price, image } = body;
 
   if (!email || !itemId) {
-    return Response.json({ error: "Missing data" }, { status: 400 });
+    return Response.json(
+      { error: "Missing email or itemId" },
+      { status: 400 }
+    );
   }
 
   let cart = await Cart.findOne({ userEmail: email });
@@ -42,10 +45,10 @@ export async function POST(req) {
     });
   }
 
-  const index = cart.items.findIndex(i => i.itemId === itemId);
+  const existing = cart.items.find(i => i.itemId === itemId);
 
-  if (index > -1) {
-    cart.items[index].quantity += 1;
+  if (existing) {
+    existing.quantity += 1;
   } else {
     cart.items.push({
       itemId,
@@ -65,10 +68,6 @@ export async function PATCH(req) {
 
   const { email, itemId, action } = await req.json();
 
-  if (!email || !itemId) {
-    return Response.json({ error: "Missing data" }, { status: 400 });
-  }
-
   const cart = await Cart.findOne({ userEmail: email });
   if (!cart) return Response.json({ items: [] });
 
@@ -79,7 +78,7 @@ export async function PATCH(req) {
   if (action === "dec") item.quantity -= 1;
 
   cart.items = cart.items.filter(i => i.quantity > 0);
-  await cart.save();
 
+  await cart.save();
   return Response.json(cart);
 }
