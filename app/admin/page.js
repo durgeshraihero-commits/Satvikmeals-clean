@@ -6,7 +6,7 @@ export default function AdminHome() {
       <h1>👨‍💼 Admin Panel</h1>
 
       <ul>
-        <li><Link href="/admin/menu">Manage Menu</Link></li>
+        <li><Link href="/admin/weekly-menu">Manage Weekly Menu</Link></li>
         <li><Link href="/admin/addons">Manage Add-ons</Link></li>
         <li><Link href="/admin/orders">Orders</Link></li>
         <li><Link href="/admin/users">Users</Link></li>
