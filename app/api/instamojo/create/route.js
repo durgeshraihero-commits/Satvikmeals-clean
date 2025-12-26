@@ -1,60 +1,70 @@
-import axios from "axios";
-import qs from "qs";
-import { NextResponse } from "next/server";
+import dbConnect from "@/lib/mongodb";
+import User from "@/models/User";
 
 export async function POST(req) {
   try {
+    await dbConnect();
+
     const { planId } = await req.json();
 
-    // ✅ PLAN DEFINITIONS
-    const plans = {
-      tea: { amount: 9, name: "Daily Tea" },
-      meal: { amount: 59, name: "Single Meal" },
-      month1: { amount: 3099, name: "1 Month Meal Plan" },
-      month2: { amount: 5999, name: "2 Month Meal Plan" },
-    };
+    // ✅ fetch logged-in user (email stored in token/session)
+    const user = await User.findOne({ email: req.headers.get("x-user-email") });
 
-    const plan = plans[planId];
-    if (!plan) {
-      return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
+    if (!user) {
+      return Response.json({ error: "User not found" }, { status: 404 });
     }
 
-    // ✅ FORM ENCODED DATA (VERY IMPORTANT)
-    const payload = qs.stringify({
-      purpose: plan.name,
-      amount: plan.amount,
-      buyer_name: "SatvikMeals User",
-      email: "customer@example.com",
-      phone: "9999999999",
-      redirect_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment-success`,
-      send_email: false,
-      send_sms: false,
-      allow_repeated_payments: false,
-    });
+    if (!user.phone || user.phone.length !== 10) {
+      return Response.json(
+        { error: "Invalid phone number in profile" },
+        { status: 400 }
+      );
+    }
 
-    const response = await axios.post(
-      "https://www.instamojo.com/api/1.1/payment-requests/",
-      payload,
+    const planMap = {
+      tea: { name: "Tea Plan", amount: 9 },
+      meal: { name: "Meal", amount: 59 },
+      month1: { name: "1 Month Meal", amount: 3099 },
+      month2: { name: "2 Month Meal", amount: 5999 },
+    };
+
+    const plan = planMap[planId];
+    if (!plan) {
+      return Response.json({ error: "Invalid plan" }, { status: 400 });
+    }
+
+    const response = await fetch(
+      `${process.env.INSTAMOJO_BASE_URL}/payment-requests/`,
       {
+        method: "POST",
         headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
           "X-Api-Key": process.env.INSTAMOJO_API_KEY,
           "X-Auth-Token": process.env.INSTAMOJO_AUTH_TOKEN,
-          "Content-Type": "application/x-www-form-urlencoded",
         },
+        body: new URLSearchParams({
+          amount: plan.amount.toString(),
+          purpose: plan.name,
+          buyer_name: user.name || "Satvik User",
+          email: user.email,
+          phone: user.phone, // ✅ REAL USER PHONE
+          redirect_url: `${process.env.NEXT_PUBLIC_BASE_URL}/api/payment/success`,
+        }),
       }
     );
 
-    // 🔥 THIS IS WHAT YOU WERE MISSING
-    const paymentUrl = response.data?.payment_request?.longurl;
+    const data = await response.json();
 
-    if (!paymentUrl) {
-      console.error("Instamojo response:", response.data);
-      return NextResponse.json({ error: "Instamojo rejected request" }, { status: 500 });
+    if (!data.success) {
+      console.error("Instamojo Error:", data);
+      return Response.json({ error: data.message }, { status: 500 });
     }
 
-    return NextResponse.json({ url: paymentUrl });
+    return Response.json({
+      url: data.payment_request.longurl, // ✅ REDIRECT URL
+    });
   } catch (err) {
-    console.error("Instamojo Error:", err?.response?.data || err.message);
-    return NextResponse.json({ error: "Payment failed" }, { status: 500 });
+    console.error(err);
+    return Response.json({ error: "Payment failed" }, { status: 500 });
   }
 }

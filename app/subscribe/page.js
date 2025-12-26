@@ -1,46 +1,78 @@
 "use client";
 
-export default function SubscribePage() {
+import { useEffect, useState } from "react";
 
-  // ✅ PAYMENT FUNCTION (INSIDE COMPONENT)
+export default function SubscribePage() {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // ✅ load logged-in user
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then(res => res.json())
+      .then(data => {
+        setUser(data.user);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  // ✅ PAY FUNCTION (THIS IS THE ONE YOU ASKED ABOUT)
   async function pay(planId) {
+    if (!user) {
+      alert("Please login first");
+      return;
+    }
+
     const res = await fetch("/api/instamojo/create", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-user-email": user.email, // ✅ VERY IMPORTANT
+      },
       body: JSON.stringify({ planId }),
     });
 
     const data = await res.json();
 
     if (data.url) {
-      window.location.href = data.url; // ✅ Redirect to Instamojo
+      window.location.href = data.url; // ✅ redirect to Instamojo
     } else {
-      alert("Payment failed");
+      alert(data.error || "Payment failed");
     }
   }
 
-  // ✅ JSX MUST BE INSIDE return()
-  return (
-    <div style={{ padding: 20 }}>
-      <h1>🍽️ Choose Your Plan</h1>
+  if (loading) return <p style={{ padding: 20 }}>Loading...</p>;
 
-      <div style={{ marginTop: 20 }}>
-        <h3>☕ Daily Tea — ₹9</h3>
+  if (!user) {
+    return <h2 style={{ padding: 20 }}>Please login to subscribe</h2>;
+  }
+
+  return (
+    <div style={{ maxWidth: 500, margin: "auto", padding: 20 }}>
+      <h1>🍽 Subscribe to SatvikMeals</h1>
+
+      <div className="info-box">
+        <h3>☕ Tea</h3>
+        <p>₹9</p>
         <button onClick={() => pay("tea")}>Pay Now</button>
       </div>
 
-      <div style={{ marginTop: 20 }}>
-        <h3>🍛 Single Meal — ₹59</h3>
+      <div className="info-box">
+        <h3>🍛 Single Meal</h3>
+        <p>₹59</p>
         <button onClick={() => pay("meal")}>Pay Now</button>
       </div>
 
-      <div style={{ marginTop: 20 }}>
-        <h3>📅 1 Month Meal Plan — ₹3099</h3>
+      <div className="info-box">
+        <h3>📦 1 Month Meal Plan</h3>
+        <p>₹3099</p>
         <button onClick={() => pay("month1")}>Pay Now</button>
       </div>
 
-      <div style={{ marginTop: 20 }}>
-        <h3>📅 2 Month Meal Plan — ₹5999</h3>
+      <div className="info-box">
+        <h3>📦 2 Month Meal Plan</h3>
+        <p>₹5999</p>
         <button onClick={() => pay("month2")}>Pay Now</button>
       </div>
     </div>
