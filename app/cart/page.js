@@ -7,10 +7,9 @@ export default function CartPage() {
 
   async function loadCart() {
     const res = await fetch("/api/cart", {
-      credentials: "include", // ✅ REQUIRED
+      credentials: "include",
       cache: "no-store",
     });
-
     const data = await res.json();
     setCart(data);
     setLoading(false);
@@ -23,7 +22,7 @@ export default function CartPage() {
   async function updateQty(itemId, action) {
     const res = await fetch("/api/cart", {
       method: "PATCH",
-      credentials: "include", // ✅ REQUIRED
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ itemId, action }),
     });
@@ -34,12 +33,28 @@ export default function CartPage() {
   async function removeItem(itemId) {
     const res = await fetch("/api/cart", {
       method: "DELETE",
-      credentials: "include", // ✅ REQUIRED
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ itemId }),
     });
 
     setCart(await res.json());
+  }
+
+  async function payNow() {
+    const res = await fetch("/api/instamojo/cart", {
+      method: "POST",
+      credentials: "include",
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || data.error) {
+      alert(data.error || "Payment failed");
+      return;
+    }
+
+    window.location.href = data.url;
   }
 
   if (loading) return <p style={{ padding: 20 }}>Loading cart...</p>;
@@ -71,7 +86,7 @@ export default function CartPage() {
       <h3>Total: ₹{total}</h3>
 
       <button
-        onClick={() => (window.location.href = "/checkout")}
+        onClick={payNow}
         style={{ padding: "10px 20px", fontSize: 16 }}
       >
         Pay Online

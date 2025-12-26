@@ -5,17 +5,15 @@ export default function AddonsPage() {
   const [addons, setAddons] = useState([]);
 
   useEffect(() => {
-    fetch("/api/addons", {
-      credentials: "include", // ✅ safe even if public
-    })
-      .then(res => res.json())
+    fetch("/api/addons", { credentials: "include" })
+      .then(r => r.json())
       .then(setAddons);
   }, []);
 
   async function addToCart(a) {
     const res = await fetch("/api/cart", {
       method: "POST",
-      credentials: "include", // ✅ THIS WAS MISSING
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         itemId: a._id,
@@ -26,12 +24,7 @@ export default function AddonsPage() {
     });
 
     const data = await res.json();
-
-    if (!res.ok || data.error) {
-      alert(data.error || "Failed to add item");
-    } else {
-      alert("Added to cart ✅");
-    }
+    alert(data.error || "Added to cart ✅");
   }
 
   return (
@@ -40,21 +33,11 @@ export default function AddonsPage() {
 
       {addons.map(a => (
         <div key={a._id} className="info-box">
-          {a.image && (
-            <img
-              src={a.image}
-              alt={a.name}
-              style={{ width: "100%", height: 120, objectFit: "cover" }}
-            />
-          )}
-
+          {a.image && <img src={a.image} style={{ width: "100%" }} />}
           <h3>{a.name}</h3>
           <p>{a.description}</p>
           <strong>₹{a.price}</strong>
-
-          <button onClick={() => addToCart(a)}>
-            🛒 Add to Cart
-          </button>
+          <button onClick={() => addToCart(a)}>🛒 Add to Cart</button>
         </div>
       ))}
     </div>
