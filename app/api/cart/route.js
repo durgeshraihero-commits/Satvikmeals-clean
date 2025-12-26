@@ -4,65 +4,40 @@ import { getUserFromToken } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
-/* GET CART */
 export async function GET() {
   await dbConnect();
   const user = getUserFromToken();
-
-  if (!user) {
-    return Response.json({ items: [] });
-  }
+  if (!user) return Response.json({ items: [] });
 
   const cart = await Cart.findOne({ userEmail: user.email });
   return Response.json(cart || { items: [] });
 }
 
-/* ADD TO CART */
 export async function POST(req) {
   await dbConnect();
   const user = getUserFromToken();
+  if (!user)
+    return Response.json({ error: "User not logged in" }, { status: 401 });
+
   const body = await req.json();
 
-  if (!user) {
-    return Response.json({ error: "User not logged in" }, { status: 401 });
-  }
-
   let cart = await Cart.findOne({ userEmail: user.email });
-
   if (!cart) {
-    cart = await Cart.create({
-      userEmail: user.email,   // ✅ FIXED
-      items: [],
-    });
+    cart = await Cart.create({ userEmail: user.email, items: [] });
   }
 
   const existing = cart.items.find(i => i.itemId === body.itemId);
-
-  if (existing) {
-    existing.quantity += 1;
-  } else {
-    cart.items.push({
-      itemId: body.itemId,
-      name: body.name,
-      price: body.price,
-      image: body.image,
-      quantity: 1,
-    });
-  }
+  if (existing) existing.quantity++;
+  else cart.items.push({ ...body, quantity: 1 });
 
   await cart.save();
   return Response.json(cart);
 }
 
-/* UPDATE QTY */
 export async function PATCH(req) {
   await dbConnect();
   const user = getUserFromToken();
   const { itemId, action } = await req.json();
-
-  if (!user) {
-    return Response.json({ items: [] });
-  }
 
   const cart = await Cart.findOne({ userEmail: user.email });
   if (!cart) return Response.json({ items: [] });
@@ -70,32 +45,24 @@ export async function PATCH(req) {
   const item = cart.items.find(i => i.itemId === itemId);
   if (!item) return Response.json(cart);
 
-  if (action === "inc") item.quantity++;
-  if (action === "dec") item.quantity--;
+  action === "inc" ? item.quantity++ : item.quantity--;
 
-  if (item.quantity <= 0) {
+  if (item.quantity <= 0)
     cart.items = cart.items.filter(i => i.itemId !== itemId);
-  }
 
   await cart.save();
   return Response.json(cart);
 }
 
-/* DELETE ITEM */
 export async function DELETE(req) {
   await dbConnect();
   const user = getUserFromToken();
   const { itemId } = await req.json();
-
-  if (!user) {
-    return Response.json({ items: [] });
-  }
 
   const cart = await Cart.findOne({ userEmail: user.email });
   if (!cart) return Response.json({ items: [] });
 
   cart.items = cart.items.filter(i => i.itemId !== itemId);
   await cart.save();
-
   return Response.json(cart);
 }
