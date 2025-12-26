@@ -10,6 +10,7 @@ export default function CartPage() {
       credentials: "include", // ✅ REQUIRED
       cache: "no-store",
     });
+
     const data = await res.json();
     setCart(data);
     setLoading(false);
@@ -57,7 +58,7 @@ export default function CartPage() {
       <h2>🛒 Your Cart</h2>
 
       {cart.items.map(item => (
-        <div key={item.itemId} style={{ marginBottom: 10 }}>
+        <div key={item.itemId} style={{ marginBottom: 12 }}>
           <strong>{item.name}</strong>
           <p>₹{item.price} × {item.quantity}</p>
 
@@ -69,7 +70,10 @@ export default function CartPage() {
 
       <h3>Total: ₹{total}</h3>
 
-      <button onClick={() => window.location.href = "/checkout"}>
+      <button
+        onClick={() => (window.location.href = "/checkout")}
+        style={{ padding: "10px 20px", fontSize: 16 }}
+      >
         Pay Online
       </button>
     </div>
