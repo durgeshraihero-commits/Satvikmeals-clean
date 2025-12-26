@@ -15,47 +15,35 @@ function getAdmin() {
   }
 }
 
-// 🔹 GET ALL PLANS
+// ✅ GET ALL PLANS
 export async function GET() {
   const admin = getAdmin();
-  if (!admin) {
+  if (!admin)
     return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
 
   await dbConnect();
   const plans = await Plan.find().sort({ createdAt: -1 });
   return Response.json(plans);
 }
 
-// 🔹 CREATE PLAN
+// ✅ CREATE PLAN
 export async function POST(req) {
   const admin = getAdmin();
-  if (!admin) {
+  if (!admin)
     return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
 
   await dbConnect();
-  const body = await req.json();
+  const { name, price, durationDays } = await req.json();
+
+  if (!name || !price || !durationDays) {
+    return Response.json({ error: "Missing fields" }, { status: 400 });
+  }
 
   const plan = await Plan.create({
-    name: body.name,
-    price: body.price,
-    durationDays: body.durationDays,
+    name,
+    price,
+    durationDays,
   });
 
   return Response.json(plan);
-}
-
-// 🔹 DELETE PLAN
-export async function DELETE(req) {
-  const admin = getAdmin();
-  if (!admin) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  await dbConnect();
-  const { id } = await req.json();
-
-  await Plan.findByIdAndDelete(id);
-  return Response.json({ success: true });
 }

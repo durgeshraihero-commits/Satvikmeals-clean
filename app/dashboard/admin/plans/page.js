@@ -11,7 +11,8 @@ export default function AdminPlansPage() {
 
   async function loadPlans() {
     const res = await fetch("/api/admin/plans");
-    setPlans(await res.json());
+    const data = await res.json();
+    setPlans(Array.isArray(data) ? data : []);
   }
 
   useEffect(() => {
@@ -36,17 +37,16 @@ export default function AdminPlansPage() {
 
   return (
     <div style={{ padding: 20 }}>
-      <h2>📦 Manage Subscription Plans</h2>
+      <h2>💳 Manage Subscription Plans</h2>
 
-      {/* CREATE PLAN */}
       <div style={{ marginBottom: 20 }}>
         <input
-          placeholder="Plan Name"
+          placeholder="Plan name"
           value={form.name}
           onChange={e => setForm({ ...form, name: e.target.value })}
         />
         <input
-          placeholder="Price"
+          placeholder="Price (₹)"
           type="number"
           value={form.price}
           onChange={e => setForm({ ...form, price: e.target.value })}
@@ -59,10 +59,9 @@ export default function AdminPlansPage() {
             setForm({ ...form, durationDays: e.target.value })
           }
         />
-        <button onClick={createPlan}>➕ Create</button>
+        <button onClick={createPlan}>➕ Create Plan</button>
       </div>
 
-      {/* LIST PLANS */}
       {plans.map(p => (
         <div key={p._id} style={{ border: "1px solid #ccc", padding: 10 }}>
           <strong>{p.name}</strong>

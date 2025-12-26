@@ -48,6 +48,9 @@ export default function Dashboard() {
         <Link href="/dashboard/payments" className="dash-card">
           💳 Payment History
         </Link>
+<Link href="/dashboard/admin/plans" className="dash-card admin">
+  💳 Manage Plans
+</Link>
       </div>
 
       {/* ================= ADMIN PANEL ================= */}
