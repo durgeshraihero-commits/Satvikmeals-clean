@@ -8,14 +8,21 @@ export const dynamic = "force-dynamic";
 export async function POST(req) {
   await dbConnect();
 
-  const userToken = getUserFromToken();
-  if (!userToken) {
-    return Response.json({ error: "Not logged in" }, { status: 401 });
+  const tokenUser = getUserFromToken();
+  if (!tokenUser) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const user = await User.findOne({ email: userToken.email });
+  const user = await User.findOne({ email: tokenUser.email });
   if (!user) {
     return Response.json({ error: "User not found" }, { status: 404 });
+  }
+
+  // 🔒 FINAL VALIDATION
+  if (!/^[6-9]\d{9}$/.test(user.phone)) {
+    return Response.json({
+      error: "Invalid phone number in profile"
+    }, { status: 400 });
   }
 
   const { amount } = await req.json();
@@ -25,10 +32,10 @@ export async function POST(req) {
       "https://www.instamojo.com/api/1.1/payment-requests/",
       {
         purpose: "SatvikMeals Order",
-        amount: amount,
-        buyer_name: user.name || user.email.split("@")[0], // ✅ AUTO NAME
-        email: user.email,                                  // ✅ AUTO EMAIL
-        phone: user.phone,                                  // ✅ AUTO PHONE
+        amount: amount.toString(),
+        buyer_name: user.name,
+        email: user.email,
+        phone: user.phone,
         redirect_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/success`,
         send_email: false,
         send_sms: false,
@@ -43,13 +50,13 @@ export async function POST(req) {
     );
 
     return Response.json({
-      url: res.data.payment_request.longurl,
+      url: res.data.payment_request.longurl
     });
 
   } catch (err) {
-    console.error("Instamojo Error:", err.response?.data || err.message);
+    console.error("INSTAMOJO ERROR:", err.response?.data);
     return Response.json(
-      { error: "Payment creation failed" },
+      { error: "Instamojo rejected buyer details" },
       { status: 500 }
     );
   }

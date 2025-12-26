@@ -4,7 +4,11 @@ const UserSchema = new mongoose.Schema(
   {
     name: String,
     email: { type: String, unique: true },
-    phone: String,
+    phone: {
+    type: String,
+    required: true,
+    match: /^[6-9]\d{9}$/  // ✅ VALID INDIAN NUMBER
+  },
 
     password: String,
 
