@@ -4,16 +4,13 @@ import jwt from "jsonwebtoken";
 
 export default function Dashboard() {
   const token = cookies().get("token")?.value;
-
-  if (!token) {
-    return <h1 style={{ padding: 20 }}>Unauthorized</h1>;
-  }
+  if (!token) return <h1>Unauthorized</h1>;
 
   let user;
   try {
     user = jwt.verify(token, process.env.JWT_SECRET);
-  } catch (err) {
-    return <h1 style={{ padding: 20 }}>Invalid session</h1>;
+  } catch {
+    return <h1>Invalid session</h1>;
   }
 
   return (
@@ -22,7 +19,7 @@ export default function Dashboard() {
         Welcome to SatvikMeals Dashboard 🌱
       </h1>
 
-      {/* ================= USER DASHBOARD ================= */}
+      {/* ===== USER DASHBOARD ===== */}
       <div className="dashboard-grid">
         <Link href="/dashboard/referral" className="dash-card">
           🎁 Refer & Earn
@@ -32,7 +29,6 @@ export default function Dashboard() {
           📦 My Subscription
         </Link>
 
-        {/* ✅ FIXED ROUTE */}
         <Link href="/menu" className="dash-card">
           🍱 Weekly Menu
         </Link>
@@ -48,17 +44,18 @@ export default function Dashboard() {
         <Link href="/dashboard/payments" className="dash-card">
           💳 Payment History
         </Link>
-<Link href="/dashboard/admin/plans" className="dash-card admin">
-  💳 Manage Plans
-</Link>
       </div>
 
-      {/* ================= ADMIN PANEL ================= */}
+      {/* ===== ADMIN PANEL ===== */}
       {user.role === "admin" && (
         <>
           <h2 style={{ marginTop: 40 }}>🛠 Admin Panel</h2>
 
           <div className="dashboard-grid">
+            <Link href="/dashboard/admin/plans" className="dash-card admin">
+              💳 Manage Plans
+            </Link>
+
             <Link href="/admin/weekly-menu" className="dash-card admin">
               🧑‍🍳 Manage Weekly Menu
             </Link>

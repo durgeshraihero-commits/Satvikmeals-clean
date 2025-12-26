@@ -1,59 +1,36 @@
 import dbConnect from "@/lib/mongodb";
 import Subscription from "@/models/Subscription";
-import Cart from "@/models/Cart";
-import { PLANS } from "@/lib/plans";
-import { getUserFromToken } from "@/lib/auth";
+import Payment from "@/models/Payment";
+import Plan from "@/models/Plan";
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
 
-export const dynamic = "force-dynamic";
+export async function POST(req) {
+  const token = cookies().get("token")?.value;
+  if (!token) return Response.json({ error: "Unauthorized" });
 
-export async function GET(req) {
+  const user = jwt.verify(token, process.env.JWT_SECRET);
+  const { planId, payment_id } = await req.json();
+
   await dbConnect();
 
-  // 🔐 Logged-in user from cookie
-  const user = getUserFromToken();
-  if (!user) {
-    return Response.redirect(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/login`
-    );
-  }
+  const plan = await Plan.findById(planId);
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + plan.durationDays);
 
-  const { searchParams } = new URL(req.url);
-  const planKey = searchParams.get("plan"); // only for subscription payments
+  await Subscription.create({
+    user: user.userId,
+    plan: planId,
+    expiresAt,
+  });
 
-  /* ===============================
-     1️⃣ HANDLE SUBSCRIPTION PAYMENT
-     =============================== */
-  if (planKey) {
-    const plan = PLANS[planKey];
-    if (!plan) {
-      return Response.redirect(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/subscribe`
-      );
-    }
+  await Payment.create({
+    user: user.userId,
+    amount: plan.price,
+    provider: "Instamojo",
+    paymentId: payment_id,
+    status: "success",
+  });
 
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + plan.durationDays);
-
-    await Subscription.findOneAndUpdate(
-      { email: user.email },
-      {
-        email: user.email,
-        plan: plan.name,
-        expiresAt,
-      },
-      { upsert: true }
-    );
-  }
-
-  /* ===============================
-     2️⃣ CLEAR CART AFTER SUCCESS
-     =============================== */
-  await Cart.deleteOne({ userEmail: user.email });
-
-  /* ===============================
-     3️⃣ REDIRECT USER
-     =============================== */
-  return Response.redirect(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard`
-  );
+  return Response.json({ success: true });
 }
