@@ -7,7 +7,7 @@ import jwt from "jsonwebtoken";
 
 export async function POST(req) {
   try {
-    // 1️⃣ Read body safely
+    // 1️⃣ Read body
     const { planId } = await req.json();
     if (!planId) {
       return Response.json({ error: "Plan ID missing" }, { status: 400 });
@@ -25,9 +25,18 @@ export async function POST(req) {
     // 3️⃣ DB
     await dbConnect();
 
-    const user = await User.findById(decoded.id);
+    // 🔴 FIX IS HERE
+    const user = await User.findById(decoded.userId);
     if (!user) {
       return Response.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // 🔴 VALIDATE PHONE
+    if (!user.phone || !/^[6-9]\d{9}$/.test(user.phone)) {
+      return Response.json(
+        { error: "Please update your phone number before payment" },
+        { status: 400 }
+      );
     }
 
     const plan = await Plan.findById(planId);
@@ -41,7 +50,7 @@ export async function POST(req) {
       amount: plan.price.toString(),
       buyer_name: user.name || "SatvikMeals User",
       email: user.email,
-      phone: user.phone || "9999999999",
+      phone: user.phone, // ✅ REAL USER PHONE
       redirect_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/success?type=subscription&plan=${plan._id}`,
       send_email: false,
       send_sms: false,
@@ -62,6 +71,7 @@ export async function POST(req) {
     return Response.json({
       url: response.data.payment_request.longurl,
     });
+
   } catch (err) {
     console.error(
       "INSTAMOJO SUBSCRIPTION ERROR:",
