@@ -1,27 +1,16 @@
-"use client";
+import dbConnect from "@/lib/mongodb";
+import Cart from "@/models/Cart";
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
 
-import { Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+export default async function Success() {
+  await dbConnect();
 
-function PaymentSuccessContent() {
-  const params = useSearchParams();
+  const token = cookies().get("token")?.value;
+  if (token) {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    await Cart.deleteOne({ userEmail: decoded.email });
+  }
 
-  const paymentId = params.get("payment_id");
-  const status = params.get("payment_status");
-
-  return (
-    <div style={{ padding: 20 }}>
-      <h2>✅ Payment Status</h2>
-      <p>Payment ID: {paymentId}</p>
-      <p>Status: {status}</p>
-    </div>
-  );
-}
-
-export default function PaymentSuccessPage() {
-  return (
-    <Suspense fallback={<p>Loading payment details...</p>}>
-      <PaymentSuccessContent />
-    </Suspense>
-  );
+  return <h1>Payment Successful 🎉</h1>;
 }

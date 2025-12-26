@@ -4,15 +4,22 @@ import { useEffect, useState } from "react";
 export default function CartPage() {
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [paying, setPaying] = useState(false); // 🔒 prevent double click
 
   async function loadCart() {
-    const res = await fetch("/api/cart", {
-      credentials: "include",
-      cache: "no-store",
-    });
-    const data = await res.json();
-    setCart(data);
-    setLoading(false);
+    try {
+      const res = await fetch("/api/cart", {
+        credentials: "include", // ✅ REQUIRED for cookie auth
+        cache: "no-store",
+      });
+
+      const data = await res.json();
+      setCart(data);
+    } catch (err) {
+      console.error("Load cart failed", err);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -27,7 +34,8 @@ export default function CartPage() {
       body: JSON.stringify({ itemId, action }),
     });
 
-    setCart(await res.json());
+    const data = await res.json();
+    setCart(data);
   }
 
   async function removeItem(itemId) {
@@ -38,28 +46,41 @@ export default function CartPage() {
       body: JSON.stringify({ itemId }),
     });
 
-    setCart(await res.json());
+    const data = await res.json();
+    setCart(data);
   }
 
   async function payNow() {
-    const res = await fetch("/api/instamojo/cart", {
-      method: "POST",
-      credentials: "include",
-    });
+    if (paying) return; // 🚫 block double click
+    setPaying(true);
 
-    const data = await res.json();
+    try {
+      const res = await fetch("/api/instamojo/cart", {
+        method: "POST",
+        credentials: "include",
+      });
 
-    if (!res.ok || data.error) {
-      alert(data.error || "Payment failed");
-      return;
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        alert(data.error || "Payment failed");
+        setPaying(false);
+        return;
+      }
+
+      // ✅ redirect ONLY once
+      window.location.href = data.url;
+    } catch (err) {
+      alert("Network error");
+      setPaying(false);
     }
-
-    window.location.href = data.url;
   }
 
-  if (loading) return <p style={{ padding: 20 }}>Loading cart...</p>;
+  if (loading) {
+    return <p style={{ padding: 20 }}>Loading cart...</p>;
+  }
 
-  if (!cart || cart.items.length === 0) {
+  if (!cart || !cart.items || cart.items.length === 0) {
     return <h2 style={{ padding: 20 }}>🛒 Cart is empty</h2>;
   }
 
@@ -73,7 +94,14 @@ export default function CartPage() {
       <h2>🛒 Your Cart</h2>
 
       {cart.items.map(item => (
-        <div key={item.itemId} style={{ marginBottom: 12 }}>
+        <div
+          key={item.itemId}
+          style={{
+            marginBottom: 12,
+            borderBottom: "1px solid #ddd",
+            paddingBottom: 10,
+          }}
+        >
           <strong>{item.name}</strong>
           <p>₹{item.price} × {item.quantity}</p>
 
@@ -87,9 +115,14 @@ export default function CartPage() {
 
       <button
         onClick={payNow}
-        style={{ padding: "10px 20px", fontSize: 16 }}
+        disabled={paying}
+        style={{
+          padding: "10px 20px",
+          fontSize: 16,
+          opacity: paying ? 0.6 : 1,
+        }}
       >
-        Pay Online
+        {paying ? "Redirecting..." : "Pay Online"}
       </button>
     </div>
   );
