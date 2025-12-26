@@ -1,18 +1,40 @@
 import dbConnect from "@/lib/mongodb";
-import Order from "@/models/Order";
+import Payment from "@/models/Payment";
+import Subscription from "@/models/Subscription";
+import Plan from "@/models/Plan";
 
 export async function POST(req) {
   await dbConnect();
-  const body = await req.formData();
+  const data = await req.formData();
 
-  const orderId = body.get("purpose")?.split("#")[1];
-  const status = body.get("status");
+  const requestId = data.get("payment_request_id");
+  const paymentId = data.get("payment_id");
+  const status = data.get("status");
 
-  if (!orderId) return Response.json({});
+  const payment = await Payment.findOne({ requestId });
+  if (!payment) return Response.json({});
 
-  await Order.findByIdAndUpdate(orderId, {
-    paymentStatus: status === "Credit" ? "PAID" : "FAILED",
-  });
+  payment.status = status;
+  payment.paymentId = paymentId;
+  await payment.save();
+
+  if (status === "Credit" && payment.source === "subscription") {
+    const plan = await Plan.findOne({ name: payment.purpose });
+
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + plan.durationDays);
+
+    await Subscription.findOneAndUpdate(
+      { email: payment.email },
+      {
+        email: payment.email,
+        planId: plan._id,
+        expiresAt,
+        active: true,
+      },
+      { upsert: true }
+    );
+  }
 
   return Response.json({ success: true });
 }

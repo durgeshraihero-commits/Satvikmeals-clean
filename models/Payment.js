@@ -1,16 +1,14 @@
 import mongoose from "mongoose";
 
-const PaymentSchema = new mongoose.Schema(
-  {
-    userEmail: { type: String, required: true },
-    orderId: mongoose.Schema.Types.ObjectId,
-    paymentId: String,
-    amount: Number,
-    status: String,
-    method: String
-  },
-  { timestamps: true }
-);
+const PaymentSchema = new mongoose.Schema({
+  email: { type: String, required: true },
+  amount: { type: Number, required: true },
+  purpose: { type: String },
+  paymentId: { type: String },
+  requestId: { type: String },
+  status: { type: String },
+  source: { type: String, enum: ["cart", "subscription"] },
+  createdAt: { type: Date, default: Date.now },
+});
 
-export default mongoose.models.Payment ||
-  mongoose.model("Payment", PaymentSchema);
+export default mongoose.models.Payment || mongoose.model("Payment", PaymentSchema);
