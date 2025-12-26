@@ -1,5 +1,7 @@
-export const dynamic = "force-dynamic";
 "use client";
+
+export const dynamic = "force-dynamic";
+
 import { useEffect, useState } from "react";
 
 export default function SubscribePage() {
@@ -25,8 +27,8 @@ export default function SubscribePage() {
 
     const data = await res.json();
 
-    if (!res.ok || data.error) {
-      alert(data.error || "Payment failed");
+    if (data.error) {
+      alert(data.error);
       return;
     }
 
@@ -42,11 +44,10 @@ export default function SubscribePage() {
       {plans.length === 0 && <p>No plans available</p>}
 
       {plans.map(plan => (
-        <div key={plan._id} className="info-box">
+        <div key={plan._id} style={{ marginBottom: 16 }}>
           <h3>{plan.name}</h3>
           <p>₹{plan.price}</p>
           <p>{plan.durationDays} days</p>
-
           <button onClick={() => payNow(plan._id)}>
             Pay Now
           </button>
