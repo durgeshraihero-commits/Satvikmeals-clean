@@ -1,14 +1,18 @@
 "use client";
-
 import { useEffect, useState } from "react";
 
 export default function CartPage() {
   const [cart, setCart] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   async function loadCart() {
-    const res = await fetch("/api/cart", { cache: "no-store" });
+    const res = await fetch("/api/cart", {
+      credentials: "include", // ✅ REQUIRED
+      cache: "no-store",
+    });
     const data = await res.json();
     setCart(data);
+    setLoading(false);
   }
 
   useEffect(() => {
@@ -18,30 +22,26 @@ export default function CartPage() {
   async function updateQty(itemId, action) {
     const res = await fetch("/api/cart", {
       method: "PATCH",
+      credentials: "include", // ✅ REQUIRED
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ itemId, action }),
     });
+
     setCart(await res.json());
   }
 
   async function removeItem(itemId) {
     const res = await fetch("/api/cart", {
       method: "DELETE",
+      credentials: "include", // ✅ REQUIRED
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ itemId }),
     });
+
     setCart(await res.json());
   }
 
-  async function payCart() {
-    const res = await fetch("/api/instamojo/cart", {
-      method: "POST",
-    });
-
-    const data = await res.json();
-    if (data.url) window.location.href = data.url;
-    else alert(data.error || "Payment failed");
-  }
+  if (loading) return <p style={{ padding: 20 }}>Loading cart...</p>;
 
   if (!cart || cart.items.length === 0) {
     return <h2 style={{ padding: 20 }}>🛒 Cart is empty</h2>;
@@ -57,9 +57,10 @@ export default function CartPage() {
       <h2>🛒 Your Cart</h2>
 
       {cart.items.map(item => (
-        <div key={item.itemId}>
+        <div key={item.itemId} style={{ marginBottom: 10 }}>
           <strong>{item.name}</strong>
           <p>₹{item.price} × {item.quantity}</p>
+
           <button onClick={() => updateQty(item.itemId, "dec")}>−</button>
           <button onClick={() => updateQty(item.itemId, "inc")}>+</button>
           <button onClick={() => removeItem(item.itemId)}>❌ Remove</button>
@@ -67,7 +68,10 @@ export default function CartPage() {
       ))}
 
       <h3>Total: ₹{total}</h3>
-      <button onClick={payCart}>Pay Online</button>
+
+      <button onClick={() => window.location.href = "/checkout"}>
+        Pay Online
+      </button>
     </div>
   );
 }

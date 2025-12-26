@@ -26,16 +26,26 @@ export async function POST(req) {
   }
 
   let cart = await Cart.findOne({ email: user.email });
+
   if (!cart) {
-    cart = await Cart.create({ email: user.email, items: [] });
+    cart = await Cart.create({
+      email: user.email,
+      items: [],
+    });
   }
 
-  const existing = cart.items.find(i => i.itemId === body.itemId);
+  const item = cart.items.find(i => i.itemId === body.itemId);
 
-  if (existing) {
-    existing.quantity += 1;
+  if (item) {
+    item.quantity += 1;
   } else {
-    cart.items.push({ ...body, quantity: 1 });
+    cart.items.push({
+      itemId: body.itemId,
+      name: body.name,
+      price: body.price,
+      image: body.image || "",
+      quantity: 1,
+    });
   }
 
   await cart.save();
@@ -47,6 +57,8 @@ export async function PATCH(req) {
   const user = getUserFromToken();
   const { itemId, action } = await req.json();
 
+  if (!user) return Response.json({ items: [] });
+
   const cart = await Cart.findOne({ email: user.email });
   if (!cart) return Response.json({ items: [] });
 
@@ -56,9 +68,7 @@ export async function PATCH(req) {
   if (action === "inc") item.quantity++;
   if (action === "dec") item.quantity--;
 
-  if (item.quantity <= 0) {
-    cart.items = cart.items.filter(i => i.itemId !== itemId);
-  }
+  cart.items = cart.items.filter(i => i.quantity > 0);
 
   await cart.save();
   return Response.json(cart);
@@ -68,6 +78,8 @@ export async function DELETE(req) {
   await dbConnect();
   const user = getUserFromToken();
   const { itemId } = await req.json();
+
+  if (!user) return Response.json({ items: [] });
 
   const cart = await Cart.findOne({ email: user.email });
   if (!cart) return Response.json({ items: [] });

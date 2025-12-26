@@ -3,13 +3,34 @@ import { useEffect, useState } from "react";
 
 export default function AddonsPage() {
   const [addons, setAddons] = useState([]);
-  const userEmail = "durgeshrai214@gmail.com"; // TEMP
 
   useEffect(() => {
-    fetch("/api/addons")
+    fetch("/api/addons", { credentials: "include" })
       .then(res => res.json())
       .then(setAddons);
   }, []);
+
+  async function addToCart(addon) {
+    const res = await fetch("/api/cart", {
+      method: "POST",
+      credentials: "include", // ✅ REQUIRED
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        itemId: addon._id,
+        name: addon.name,
+        price: addon.price,
+        image: addon.image || "",
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.error || "Failed to add item");
+    } else {
+      alert("✅ Item added to cart");
+    }
+  }
 
   return (
     <div className="dashboard-section">
@@ -21,7 +42,12 @@ export default function AddonsPage() {
             <img
               src={a.image}
               alt={a.name}
-              style={{ width: "100%", height: 120, objectFit: "cover", borderRadius: 8 }}
+              style={{
+                width: "100%",
+                height: 120,
+                objectFit: "cover",
+                borderRadius: 8,
+              }}
             />
           )}
 
@@ -35,21 +61,7 @@ export default function AddonsPage() {
 
           <strong>₹{a.price}</strong>
 
-          <button
-            onClick={() =>
-              fetch("/api/cart", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  email: userEmail,
-                  itemId: a._id,
-                  name: a.name,
-                  price: a.price,
-                  image: a.image,
-                }),
-              })
-            }
-          >
+          <button onClick={() => addToCart(a)}>
             🛒 Add to Cart
           </button>
         </div>
