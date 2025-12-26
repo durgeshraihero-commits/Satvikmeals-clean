@@ -1,16 +1,15 @@
-import dbConnect from "@/lib/mongodb";
-import Cart from "@/models/Cart";
-import { cookies } from "next/headers";
-import jwt from "jsonwebtoken";
+"use client";
+import { useEffect } from "react";
 
-export default async function Success() {
-  await dbConnect();
+export default function PaymentSuccess() {
+  useEffect(() => {
+    // later you can verify payment via webhook
+  }, []);
 
-  const token = cookies().get("token")?.value;
-  if (token) {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    await Cart.deleteOne({ userEmail: decoded.email });
-  }
-
-  return <h1>Payment Successful 🎉</h1>;
+  return (
+    <div style={{ padding: 20 }}>
+      <h2>✅ Payment Successful</h2>
+      <p>Your subscription is active.</p>
+    </div>
+  );
 }
