@@ -1,13 +1,15 @@
 import dbConnect from "@/lib/mongodb";
 import Plan from "@/models/Plan";
+import Subscription from "@/models/Subscription";
 import User from "@/models/User";
-import axios from "axios";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
+import { DEV_MODE } from "@/lib/config";
 
 export async function POST(req) {
   try {
     const { planId } = await req.json();
+
     if (!planId) {
       return Response.json({ error: "Plan ID missing" }, { status: 400 });
     }
@@ -22,11 +24,8 @@ export async function POST(req) {
     await dbConnect();
 
     const user = await User.findById(decoded.userId);
-    if (!user || !user.phone) {
-      return Response.json(
-        { error: "User phone number missing" },
-        { status: 400 }
-      );
+    if (!user) {
+      return Response.json({ error: "User not found" }, { status: 404 });
     }
 
     const plan = await Plan.findById(planId);
@@ -34,31 +33,33 @@ export async function POST(req) {
       return Response.json({ error: "Plan not found" }, { status: 404 });
     }
 
-    const response = await axios.post(
-      "https://www.instamojo.com/api/1.1/payment-requests/",
-      {
-        purpose: `SatvikMeals - ${plan.name}`,
-        amount: plan.price.toString(),
-        buyer_name: user.name || "SatvikMeals User",
-        email: user.email,
-        phone: user.phone, // ✅ REAL USER PHONE
-        redirect_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/success?type=subscription&plan=${plan._id}`,
-        send_email: false,
-        send_sms: false,
-      },
-      {
-        headers: {
-          "X-Api-Key": process.env.INSTAMOJO_API_KEY,
-          "X-Auth-Token": process.env.INSTAMOJO_AUTH_TOKEN,
-        },
-      }
-    );
+    // 🧪 DEV MODE (NO PAYMENT, NO MONEY)
+    if (DEV_MODE) {
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + plan.durationDays);
 
-    return Response.json({
-      url: response.data.payment_request.longurl,
-    });
+      await Subscription.findOneAndUpdate(
+        { email: user.email },
+        {
+          email: user.email,
+          plan: plan.name,
+          expiresAt,
+        },
+        { upsert: true }
+      );
+
+      return Response.json({
+        success: true,
+        message: "Subscription activated (DEV MODE)",
+      });
+    }
+
+    return Response.json(
+      { error: "Real payments disabled in DEV mode" },
+      { status: 400 }
+    );
   } catch (err) {
-    console.error("INSTAMOJO ERROR:", err?.response?.data || err);
-    return Response.json({ error: "Payment failed" }, { status: 500 });
+    console.error("SUBSCRIPTION ERROR:", err);
+    return Response.json({ error: "Server error" }, { status: 500 });
   }
 }
