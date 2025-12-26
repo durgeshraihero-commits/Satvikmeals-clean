@@ -5,16 +5,22 @@ const CartItemSchema = new mongoose.Schema({
   name: String,
   price: Number,
   image: String,
-  quantity: { type: Number, default: 1 }
+  quantity: {
+    type: Number,
+    default: 1,
+  },
 });
 
 const CartSchema = new mongoose.Schema(
   {
-    userEmail: { type: String, required: true },
-    items: [CartItemSchema]
+    userEmail: {
+      type: String,
+      required: true,
+      index: true,
+    },
+    items: [CartItemSchema],
   },
   { timestamps: true }
 );
 
-export default mongoose.models.Cart ||
-  mongoose.model("Cart", CartSchema);
+export default mongoose.models.Cart || mongoose.model("Cart", CartSchema);
