@@ -19,33 +19,23 @@ export async function GET() {
 export async function POST(req) {
   await dbConnect();
   const user = getUserFromToken();
-  const body = await req.json();
-
   if (!user) {
     return Response.json({ error: "User not logged in" }, { status: 401 });
   }
 
-  let cart = await Cart.findOne({ email: user.email });
+  const body = await req.json();
 
+  let cart = await Cart.findOne({ email: user.email });
   if (!cart) {
-    cart = await Cart.create({
-      email: user.email,
-      items: [],
-    });
+    cart = await Cart.create({ email: user.email, items: [] });
   }
 
-  const item = cart.items.find(i => i.itemId === body.itemId);
+  const existing = cart.items.find(i => i.itemId === body.itemId);
 
-  if (item) {
-    item.quantity += 1;
+  if (existing) {
+    existing.quantity += 1;
   } else {
-    cart.items.push({
-      itemId: body.itemId,
-      name: body.name,
-      price: body.price,
-      image: body.image || "",
-      quantity: 1,
-    });
+    cart.items.push({ ...body, quantity: 1 });
   }
 
   await cart.save();
@@ -55,10 +45,9 @@ export async function POST(req) {
 export async function PATCH(req) {
   await dbConnect();
   const user = getUserFromToken();
+  if (!user) return Response.json({ error: "Not logged in" }, { status: 401 });
+
   const { itemId, action } = await req.json();
-
-  if (!user) return Response.json({ items: [] });
-
   const cart = await Cart.findOne({ email: user.email });
   if (!cart) return Response.json({ items: [] });
 
@@ -68,7 +57,9 @@ export async function PATCH(req) {
   if (action === "inc") item.quantity++;
   if (action === "dec") item.quantity--;
 
-  cart.items = cart.items.filter(i => i.quantity > 0);
+  if (item.quantity <= 0) {
+    cart.items = cart.items.filter(i => i.itemId !== itemId);
+  }
 
   await cart.save();
   return Response.json(cart);
@@ -77,10 +68,9 @@ export async function PATCH(req) {
 export async function DELETE(req) {
   await dbConnect();
   const user = getUserFromToken();
+  if (!user) return Response.json({ error: "Not logged in" }, { status: 401 });
+
   const { itemId } = await req.json();
-
-  if (!user) return Response.json({ items: [] });
-
   const cart = await Cart.findOne({ email: user.email });
   if (!cart) return Response.json({ items: [] });
 

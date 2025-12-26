@@ -10,7 +10,7 @@ export async function POST(req) {
   const { identifier, password } = await req.json();
 
   const user = await User.findOne({
-    $or: [{ email: identifier }, { phone: identifier }]
+    $or: [{ email: identifier }, { phone: identifier }],
   });
 
   if (!user) {
@@ -18,31 +18,35 @@ export async function POST(req) {
   }
 
   const isMatch = await bcrypt.compare(password, user.password);
-
   if (!isMatch) {
     return Response.json({ error: "Invalid credentials" }, { status: 401 });
   }
 
-const token = jwt.sign(
-  {
-    userId: user._id,
-    email: user.email,   // ✅ REQUIRED
-    role: user.role || "user"
-  },
-  process.env.JWT_SECRET,
-  { expiresIn: "7d" }
-);
-  cookies().set("token", token, {
+  const token = jwt.sign(
+    {
+      userId: user._id,
+      email: user.email,
+      role: user.role || "user",
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: "7d" }
+  );
+
+  // ✅ FIXED COOKIE
+  cookies().set({
+    name: "token",
+    value: token,
     httpOnly: true,
-    secure: true,
-    path: "/"
+    sameSite: "lax",
+    secure: false,   // ✅ MUST be false on Render
+    path: "/",
   });
 
   return Response.json({
     success: true,
     user: {
       email: user.email,
-      role: user.role
-    }
+      role: user.role,
+    },
   });
 }
