@@ -1,22 +1,35 @@
-import User from "@/models/User";
 import dbConnect from "@/lib/mongodb";
+import Subscription from "@/models/Subscription";
+import Plan from "@/models/Plan";
+import jwt from "jsonwebtoken";
+import { cookies } from "next/headers";
 
-export async function POST(req) {
+export async function GET(req) {
+  const token = cookies().get("token")?.value;
+  if (!token) return Response.json({ error: "Unauthorized" }, { status: 401 });
+
+  const user = jwt.verify(token, process.env.JWT_SECRET);
+
+  const { searchParams } = new URL(req.url);
+  const planId = searchParams.get("plan");
+
   await dbConnect();
-  const { userId, plan } = await req.json();
 
-  const user = await User.findById(userId);
+  const plan = await Plan.findById(planId);
+  if (!plan) return Response.json({ error: "Plan not found" }, { status: 404 });
 
-  if (user.referredBy && plan >= 3099) {
-    const referrer = await User.findOne({
-      referralCode: user.referredBy,
-    });
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + plan.durationDays);
 
-    if (referrer) {
-      referrer.walletBalance += 100;
-      await referrer.save();
-    }
-  }
+  await Subscription.findOneAndUpdate(
+    { userId: user.id },
+    {
+      userId: user.id,
+      planName: plan.name,
+      expiresAt,
+    },
+    { upsert: true }
+  );
 
   return Response.json({ success: true });
 }

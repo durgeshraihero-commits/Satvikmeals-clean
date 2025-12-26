@@ -1,13 +1,8 @@
 import dbConnect from "@/lib/mongodb";
-import Subscription from "@/models/Subscription";
-import { getUserFromToken } from "@/lib/auth";
+import Plan from "@/models/Plan";
 
 export async function GET() {
   await dbConnect();
-  const user = getUserFromToken();
-
-  if (!user) return Response.json({ active: false });
-
-  const sub = await Subscription.findOne({ email: user.email });
-  return Response.json(sub || { active: false });
+  const plans = await Plan.find().sort({ price: 1 });
+  return Response.json(plans);
 }

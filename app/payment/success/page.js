@@ -1,15 +1,14 @@
 "use client";
 import { useEffect } from "react";
 
-export default function PaymentSuccess() {
+export default function PaymentSuccessPage() {
   useEffect(() => {
-    // later you can verify payment via webhook
+    fetch("/api/subscription/confirm", {
+      credentials: "include",
+    }).then(() => {
+      window.location.href = "/dashboard/subscription";
+    });
   }, []);
 
-  return (
-    <div style={{ padding: 20 }}>
-      <h2>✅ Payment Successful</h2>
-      <p>Your subscription is active.</p>
-    </div>
-  );
+  return <p style={{ padding: 20 }}>Activating subscription...</p>;
 }
