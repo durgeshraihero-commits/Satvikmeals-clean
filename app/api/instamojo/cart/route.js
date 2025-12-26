@@ -1,39 +1,37 @@
 import dbConnect from "@/lib/mongodb";
 import Cart from "@/models/Cart";
-import User from "@/models/User";
 import { getUserFromToken } from "@/lib/auth";
 import axios from "axios";
 
-export async function POST(req) {
+export const dynamic = "force-dynamic";
+
+export async function POST() {
   await dbConnect();
-  const user = getUserFromToken(req);
+  const user = getUserFromToken();
 
   if (!user) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
+    return Response.json({ error: "User not logged in" }, { status: 401 });
   }
 
-  const cart = await Cart.findOne({ userId: user._id });
-
+  const cart = await Cart.findOne({ email: user.email });
   if (!cart || cart.items.length === 0) {
     return Response.json({ error: "Cart is empty" }, { status: 400 });
   }
 
-  const total = cart.items.reduce(
-    (sum, i) => sum + i.price * i.quantity,
+  const amount = cart.items.reduce(
+    (sum, i) => sum + Number(i.price) * i.quantity,
     0
   );
 
-  const response = await axios.post(
+  const res = await axios.post(
     `${process.env.INSTAMOJO_BASE_URL}/payment-requests/`,
     {
-      purpose: "SatvikMeals Cart Order",
-      amount: total,
-      buyer_name: user.name || "Customer",
-      email: user.email,
-      phone: user.phone,
+      amount,
+      purpose: "SatvikMeals Cart",
+      buyer_email: user.email,
       redirect_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/success`,
-      send_email: false,
-      send_sms: false,
+      send_email: true,
+      allow_repeated_payments: false,
     },
     {
       headers: {
@@ -44,6 +42,6 @@ export async function POST(req) {
   );
 
   return Response.json({
-    url: response.data.payment_request.longurl,
+    url: res.data.payment_request.longurl,
   });
 }
