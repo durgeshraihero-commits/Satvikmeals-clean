@@ -4,38 +4,40 @@ import { getUserFromToken } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
-function getEmail() {
-  const user = getUserFromToken();
-  if (!user?.email) throw new Error("Unauthorized");
-  return user.email;
-}
-
-export async function GET() {
+export async function GET(req) {
   await dbConnect();
-  const email = getEmail();
+  const user = getUserFromToken(req);
 
-  let cart = await Cart.findOne({ userEmail: email });
-  if (!cart) {
-    cart = await Cart.create({ userEmail: email, items: [] });
+  if (!user) {
+    return Response.json({ items: [] });
   }
 
-  return Response.json(cart);
+  const cart = await Cart.findOne({ userId: user._id });
+  return Response.json(cart || { items: [] });
 }
 
 export async function POST(req) {
   await dbConnect();
-  const email = getEmail();
-  const body = await req.json();
+  const user = getUserFromToken(req);
 
-  let cart = await Cart.findOne({ userEmail: email });
-  if (!cart) {
-    cart = await Cart.create({ userEmail: email, items: [] });
+  if (!user) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const index = cart.items.findIndex(i => i.itemId === body.itemId);
+  const body = await req.json();
+  let cart = await Cart.findOne({ userId: user._id });
 
-  if (index > -1) {
-    cart.items[index].quantity += 1;
+  if (!cart) {
+    cart = await Cart.create({
+      userId: user._id,
+      items: [],
+    });
+  }
+
+  const existing = cart.items.find(i => i.itemId === body.itemId);
+
+  if (existing) {
+    existing.quantity += 1;
   } else {
     cart.items.push({
       itemId: body.itemId,
@@ -52,10 +54,10 @@ export async function POST(req) {
 
 export async function PATCH(req) {
   await dbConnect();
-  const email = getEmail();
+  const user = getUserFromToken(req);
   const { itemId, action } = await req.json();
 
-  const cart = await Cart.findOne({ userEmail: email });
+  const cart = await Cart.findOne({ userId: user._id });
   if (!cart) return Response.json({ items: [] });
 
   const item = cart.items.find(i => i.itemId === itemId);
@@ -65,17 +67,17 @@ export async function PATCH(req) {
   if (action === "dec") item.quantity -= 1;
 
   cart.items = cart.items.filter(i => i.quantity > 0);
-  await cart.save();
 
+  await cart.save();
   return Response.json(cart);
 }
 
 export async function DELETE(req) {
   await dbConnect();
-  const email = getEmail();
+  const user = getUserFromToken(req);
   const { itemId } = await req.json();
 
-  const cart = await Cart.findOne({ userEmail: email });
+  const cart = await Cart.findOne({ userId: user._id });
   if (!cart) return Response.json({ items: [] });
 
   cart.items = cart.items.filter(i => i.itemId !== itemId);
