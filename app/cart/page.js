@@ -6,17 +6,13 @@ export default function CartPage() {
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const userEmail = "durgeshrai214@gmail.com"; // TEMP
-
   useEffect(() => {
     loadCart();
   }, []);
 
   async function loadCart() {
     try {
-      const res = await fetch(`/api/cart?email=${userEmail}`, {
-        cache: "no-store"
-      });
+      const res = await fetch("/api/cart", { cache: "no-store" });
       const data = await res.json();
       setCart(data);
     } catch (err) {
@@ -30,36 +26,35 @@ export default function CartPage() {
     const res = await fetch("/api/cart", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ itemId, action, email: userEmail })
+      body: JSON.stringify({ itemId, action }),
     });
 
-    const data = await res.json();
-    setCart(data);
+    setCart(await res.json());
   }
 
-  async function proceedToInstamojo() {
-    const total = cart.items.reduce(
-      (sum, i) => sum + Number(i.price) * i.quantity,
-      0
-    );
-
-    const res = await fetch("/api/instamojo/create", {
-      method: "POST",
+  async function removeItem(itemId) {
+    const res = await fetch("/api/cart", {
+      method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: userEmail,
-        amount: total
-      })
+      body: JSON.stringify({ itemId }),
+    });
+
+    setCart(await res.json());
+  }
+
+  // ✅ CART PAYMENT (FIXED)
+  async function payCart() {
+    const res = await fetch("/api/instamojo/cart", {
+      method: "POST",
     });
 
     const data = await res.json();
 
-    if (!res.ok || data.error) {
+    if (data.url) {
+      window.location.href = data.url; // ✅ REDIRECT
+    } else {
       alert(data.error || "Payment failed");
-      return;
     }
-
-    window.location.href = data.paymentUrl;
   }
 
   if (loading) return <p style={{ padding: 20 }}>Loading cart...</p>;
@@ -68,66 +63,77 @@ export default function CartPage() {
     return <h2 style={{ padding: 20 }}>🛒 Cart is empty</h2>;
   }
 
+  const total = cart.items.reduce(
+    (sum, i) => sum + Number(i.price) * i.quantity,
+    0
+  );
+
   return (
     <div style={{ maxWidth: 420, margin: "auto", padding: 16 }}>
       <h2>🛒 Your Cart</h2>
 
-{cart.items.map(item => (
-  <div
-    key={item.itemId}
-    style={{
-      display: "flex",
-      gap: 12,
-      padding: 12,
-      border: "1px solid #ddd",
-      borderRadius: 10,
-      marginBottom: 12,
-    }}
-  >
-    {/* IMAGE */}
-    {item.image && (
-      <img
-        src={item.image}
-        alt={item.name}
-        style={{
-          width: 70,
-          height: 70,
-          objectFit: "cover",
-          borderRadius: 8,
-        }}
-      />
-    )}
-
-    {/* DETAILS */}
-    <div style={{ flex: 1 }}>
-      <strong>{item.name}</strong>
-      <p style={{ margin: "4px 0" }}>
-        ₹{item.price} × {item.quantity}
-      </p>
-
-      <div style={{ display: "flex", gap: 8 }}>
-        <button onClick={() => updateQty(item.itemId, "dec")}>−</button>
-        <button onClick={() => updateQty(item.itemId, "inc")}>+</button>
-
-        {/* ❌ DELETE COMPLETELY */}
-        <button
-          style={{ color: "red" }}
-          onClick={async () => {
-            const res = await fetch("/api/cart", {
-              method: "DELETE",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ itemId: item.itemId }),
-            });
-            setCart(await res.json());
+      {cart.items.map((item) => (
+        <div
+          key={item.itemId}
+          style={{
+            display: "flex",
+            gap: 12,
+            padding: 12,
+            border: "1px solid #ddd",
+            borderRadius: 10,
+            marginBottom: 12,
           }}
         >
-          ❌ Remove
-        </button>
-      </div>
-    </div>
-  </div>
-))}
-      <button onClick={proceedToInstamojo}>
+          {/* IMAGE */}
+          {item.image && (
+            <img
+              src={item.image}
+              alt={item.name}
+              style={{
+                width: 70,
+                height: 70,
+                objectFit: "cover",
+                borderRadius: 8,
+              }}
+            />
+          )}
+
+          {/* DETAILS */}
+          <div style={{ flex: 1 }}>
+            <strong>{item.name}</strong>
+            <p style={{ margin: "4px 0" }}>
+              ₹{item.price} × {item.quantity}
+            </p>
+
+            <div style={{ display: "flex", gap: 8 }}>
+              <button onClick={() => updateQty(item.itemId, "dec")}>−</button>
+              <button onClick={() => updateQty(item.itemId, "inc")}>+</button>
+
+              <button
+                style={{ color: "red" }}
+                onClick={() => removeItem(item.itemId)}
+              >
+                ❌ Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      ))}
+
+      <h3>Total: ₹{total}</h3>
+
+      <button
+        onClick={payCart}
+        style={{
+          width: "100%",
+          padding: 12,
+          background: "#ea580c",
+          color: "#fff",
+          border: "none",
+          borderRadius: 10,
+          fontSize: 16,
+        }}
+      >
         Pay Online
       </button>
     </div>
