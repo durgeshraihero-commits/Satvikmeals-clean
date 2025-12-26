@@ -1,20 +1,18 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 
-export default function PaymentSuccessPage() {
+function SuccessInner() {
   const params = useSearchParams();
   const router = useRouter();
 
   useEffect(() => {
+    // optional: read params
     const type = params.get("type");
     const plan = params.get("plan");
 
-    // You already handle saving in API/webhook
-    // Just redirect user nicely
+    // redirect after success
     setTimeout(() => {
       router.replace("/dashboard/subscription");
     }, 2000);
@@ -25,5 +23,13 @@ export default function PaymentSuccessPage() {
       <h2>✅ Payment Successful</h2>
       <p>Activating your subscription…</p>
     </div>
+  );
+}
+
+export default function PaymentSuccessPage() {
+  return (
+    <Suspense fallback={<p>Processing payment...</p>}>
+      <SuccessInner />
+    </Suspense>
   );
 }
