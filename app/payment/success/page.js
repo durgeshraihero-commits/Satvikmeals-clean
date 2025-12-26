@@ -1,57 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 
-export default function PaymentSuccessPage() {
+function PaymentSuccessContent() {
   const params = useSearchParams();
-  const router = useRouter();
 
   const paymentId = params.get("payment_id");
-  const paymentStatus = params.get("payment_status");
-
-  const [status, setStatus] = useState("Saving your order...");
-
-  useEffect(() => {
-    async function saveOrder() {
-      if (!paymentId || paymentStatus !== "Credit") {
-        setStatus("Payment failed or cancelled");
-        return;
-      }
-
-      try {
-        const res = await fetch("/api/orders/save", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            paymentId,
-            paymentStatus: "Credit"
-          })
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          setStatus(data.error || "Failed to save order");
-          return;
-        }
-
-        setStatus("✅ Order placed successfully!");
-        setTimeout(() => router.push("/dashboard/orders"), 2000);
-
-      } catch (err) {
-        console.error(err);
-        setStatus("Something went wrong");
-      }
-    }
-
-    saveOrder();
-  }, [paymentId, paymentStatus]);
+  const status = params.get("payment_status");
 
   return (
-    <div style={{ padding: 30, textAlign: "center" }}>
-      <h2>{status}</h2>
-      <p>Please do not refresh this page.</p>
+    <div style={{ padding: 20 }}>
+      <h2>✅ Payment Status</h2>
+      <p>Payment ID: {paymentId}</p>
+      <p>Status: {status}</p>
     </div>
+  );
+}
+
+export default function PaymentSuccessPage() {
+  return (
+    <Suspense fallback={<p>Loading payment details...</p>}>
+      <PaymentSuccessContent />
+    </Suspense>
   );
 }
