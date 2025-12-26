@@ -6,10 +6,10 @@ export default function SubscribePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/subscription")
+    fetch("/api/plans", { cache: "no-store" })
       .then(res => res.json())
       .then(data => {
-        setPlans(data);
+        setPlans(data.plans || []);
         setLoading(false);
       });
   }, []);
@@ -32,22 +32,16 @@ export default function SubscribePage() {
     window.location.href = data.url;
   }
 
-  if (loading) return <p style={{ padding: 20 }}>Loading plans...</p>;
+  if (loading) return <p>Loading plans...</p>;
 
   return (
-    <div style={{ padding: 20 }}>
+    <div className="dashboard-section">
       <h2>📦 Subscription Plans</h2>
 
+      {plans.length === 0 && <p>No plans available</p>}
+
       {plans.map(plan => (
-        <div
-          key={plan._id}
-          style={{
-            border: "1px solid #ddd",
-            padding: 15,
-            marginBottom: 15,
-            borderRadius: 8,
-          }}
-        >
+        <div key={plan._id} className="info-box">
           <h3>{plan.name}</h3>
           <p>₹{plan.price}</p>
           <p>{plan.durationDays} days</p>
