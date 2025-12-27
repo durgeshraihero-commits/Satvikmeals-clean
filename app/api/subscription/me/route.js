@@ -11,19 +11,18 @@ export async function GET() {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const userId = decoded.userId;
 
     await dbConnect();
 
     const subscription = await Subscription.findOne({
-      user: userId,
-      status: "active",              // ✅ REQUIRED
-      expiresAt: { $gt: new Date() }, // ✅ REQUIRED
+      user: decoded.userId,      // ✅ MUST MATCH DB
+      status: "active",          // ✅ MUST MATCH DB
+      expiresAt: { $gt: new Date() },
     }).populate("plan");
 
     return Response.json({ subscription });
   } catch (err) {
-    console.error(err);
+    console.error("SUBSCRIPTION ME ERROR:", err);
     return Response.json({ subscription: null });
   }
 }
