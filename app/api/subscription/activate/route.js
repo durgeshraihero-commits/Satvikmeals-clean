@@ -16,7 +16,9 @@ export async function POST(req) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // ✅ CORRECT FIELD
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.userId;
 
     await dbConnect();
 
@@ -29,9 +31,9 @@ export async function POST(req) {
     expiresAt.setDate(expiresAt.getDate() + plan.durationDays);
 
     await Subscription.findOneAndUpdate(
-      { user: decoded.userId },
+      { user: userId },
       {
-        user: decoded.userId,
+        user: userId,
         plan: plan._id,
         expiresAt,
       },

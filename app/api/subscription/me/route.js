@@ -8,12 +8,14 @@ export async function GET() {
     const token = cookies().get("token")?.value;
     if (!token) return Response.json({ subscription: null });
 
+    // ✅ SAME FIX HERE
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.userId;
 
     await dbConnect();
 
     const subscription = await Subscription.findOne({
-      user: decoded.userId,
+      user: userId,
       expiresAt: { $gt: new Date() },
     }).populate("plan");
 

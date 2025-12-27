@@ -12,18 +12,9 @@ const SubscriptionSchema = new mongoose.Schema(
       ref: "Plan",
       required: true,
     },
-    startsAt: {
-      type: Date,
-      default: Date.now,
-    },
     expiresAt: {
       type: Date,
       required: true,
-    },
-    status: {
-      type: String,
-      enum: ["active", "expired"],
-      default: "active",
     },
   },
   { timestamps: true }
