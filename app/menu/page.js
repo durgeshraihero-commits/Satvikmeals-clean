@@ -6,7 +6,10 @@ export const dynamic = "force-dynamic";
 export default async function MenuPage() {
   await dbConnect();
 
-  const menu = await WeeklyMenu.findOne({ published: true }).sort({ createdAt: -1 });
+  const menu = await WeeklyMenu
+    .findOne({ published: true })
+    .sort({ createdAt: -1 })
+    .lean();
 
   return (
     <div className="dashboard-section">
@@ -16,9 +19,19 @@ export default async function MenuPage() {
 
       {menu && (
         <div className="menu-card">
-          {menu.items.map((item, i) => (
-            <div key={i}>
-              <strong>{item.day}</strong> – {item.meal}
+          {menu.days.map((day, index) => (
+            <div
+              key={index}
+              style={{
+                marginBottom: 16,
+                padding: 12,
+                border: "1px solid #ddd",
+                borderRadius: 8,
+              }}
+            >
+              <h4>📅 {day.day}</h4>
+              <p>🍛 <strong>Lunch:</strong> {day.lunch || "Not set"}</p>
+              <p>🌙 <strong>Dinner:</strong> {day.dinner || "Not set"}</p>
             </div>
           ))}
         </div>
