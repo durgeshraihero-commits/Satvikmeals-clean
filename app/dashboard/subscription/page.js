@@ -16,29 +16,24 @@ export default function SubscriptionPage() {
 
   if (loading) return <p>Loading...</p>;
 
-  // ❌ NO SUBSCRIPTION
   if (!sub) {
     return (
       <div className="dashboard-section">
         <h2>❌ No Active Subscription</h2>
-        <p>Please subscribe to access meals.</p>
-
         <a href="/subscribe">
-          <button className="btn-primary">View Plans</button>
+          <button>View Plans</button>
         </a>
       </div>
     );
   }
 
-  // ✅ ACTIVE SUBSCRIPTION
   return (
     <div className="dashboard-section">
       <h2>✅ Active Subscription</h2>
+      <p><b>{sub.plan.name}</b></p>
       <p>
         Valid till:{" "}
-        <strong>
-          {new Date(sub.expiresAt).toDateString()}
-        </strong>
+        <strong>{new Date(sub.expiresAt).toDateString()}</strong>
       </p>
     </div>
   );

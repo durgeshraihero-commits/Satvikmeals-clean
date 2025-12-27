@@ -6,22 +6,20 @@ import jwt from "jsonwebtoken";
 export async function GET() {
   try {
     const token = cookies().get("token")?.value;
-    if (!token) {
-      return Response.json({ subscription: null });
-    }
+    if (!token) return Response.json({ subscription: null });
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     await dbConnect();
 
-    const sub = await Subscription.findOne({
+    const subscription = await Subscription.findOne({
       user: decoded.userId,
       expiresAt: { $gt: new Date() },
     }).populate("plan");
 
-    return Response.json({ subscription: sub });
+    return Response.json({ subscription });
   } catch (err) {
-    console.error(err);
+    console.error("SUB ME ERROR:", err);
     return Response.json({ subscription: null });
   }
 }

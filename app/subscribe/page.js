@@ -19,7 +19,7 @@ export default function SubscribePage() {
   }, []);
 
   async function payNow(planId) {
-    const res = await fetch("/api/instamojo/subscription", {
+    const res = await fetch("/api/subscription/activate", {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
@@ -28,22 +28,13 @@ export default function SubscribePage() {
 
     const data = await res.json();
 
-    if (data.error) {
-      alert(data.error);
+    if (!res.ok || data.error) {
+      alert(data.error || "Subscription failed");
       return;
     }
 
-    // ✅ DEV MODE (no payment gateway)
-    if (data.success) {
-      alert("Subscription activated successfully 🎉");
-      window.location.href = "/dashboard/subscription";
-      return;
-    }
-
-    // ✅ REAL PAYMENT MODE (future)
-    if (data.url) {
-      window.location.href = data.url;
-    }
+    alert("Subscription activated successfully 🎉");
+    window.location.href = "/dashboard/subscription";
   }
 
   if (loading) return <p>Loading plans...</p>;
