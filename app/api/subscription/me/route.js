@@ -16,14 +16,18 @@ export async function GET() {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // 🔥 IMPORTANT FIX:
-    // Match by EMAIL (most stable, you ARE saving email)
-    const subscription = await Subscription.findOne({
-      email: decoded.email,
-      expiresAt: { $gt: new Date() },
-    }).sort({ createdAt: -1 });
+    // ✅ IMPORTANT: use decoded.userId (confirmed by your DB)
+    const userId = decoded.userId;
 
-    return Response.json({ subscription });
+    const subscription = await Subscription.findOne({
+      user: userId,
+      status: "active",
+      expiresAt: { $gt: new Date() },
+    }).populate("plan");
+
+    return Response.json({
+      subscription: subscription || null,
+    });
   } catch (err) {
     console.error("SUBSCRIPTION ME ERROR:", err);
     return Response.json({ subscription: null });
