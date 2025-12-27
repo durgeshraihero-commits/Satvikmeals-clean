@@ -22,9 +22,17 @@ export async function POST(req) {
     return Response.json({ error: "Invalid credentials" }, { status: 401 });
   }
 
+  // 🔥 FORCE DELETE OLD TOKEN
+  cookies().set("token", "", {
+    httpOnly: true,
+    expires: new Date(0),
+    path: "/",
+  });
+
+  // ✅ CREATE FRESH TOKEN
   const token = jwt.sign(
     {
-      userId: user._id,
+      userId: user._id.toString(), // 🔑 CRITICAL
       email: user.email,
       role: user.role || "user",
     },
@@ -32,14 +40,14 @@ export async function POST(req) {
     { expiresIn: "7d" }
   );
 
-  // ✅ FIXED COOKIE
   cookies().set({
     name: "token",
     value: token,
     httpOnly: true,
     sameSite: "lax",
-    secure: false,   // ✅ MUST be false on Render
+    secure: false, // Render
     path: "/",
+    maxAge: 60 * 60 * 24 * 7,
   });
 
   return Response.json({
