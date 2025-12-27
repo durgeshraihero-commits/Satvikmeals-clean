@@ -1,20 +1,15 @@
 import mongoose from "mongoose";
 
-const DishSchema = new mongoose.Schema({
-  name: String,
-  image: String,
-});
-
-const DaySchema = new mongoose.Schema({
-  date: String,
-  lunch: [DishSchema],
-  dinner: [DishSchema],
-});
-
 const WeeklyMenuSchema = new mongoose.Schema(
   {
-    days: [DaySchema],
-    published: { type: Boolean, default: false },
+    title: String,
+    items: [String],
+    weekStart: Date,
+
+    published: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
