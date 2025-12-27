@@ -17,42 +17,30 @@ export default function SubscribePage() {
       });
   }, []);
 
-  async function payNow(planId) {
-    const res = await fetch("/api/instamojo/subscription", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ planId }),
-    });
+async function payNow(planId) {
+  const res = await fetch("/api/instamojo/subscription", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ planId }),
+  });
 
-    const data = await res.json();
+  const data = await res.json();
 
-    if (data.error) {
-      alert(data.error);
-      return;
-    }
-
-    window.location.href = data.url;
+  if (data.error) {
+    alert(data.error);
+    return;
   }
 
-  if (loading) return <p>Loading plans...</p>;
+  // ✅ DEV MODE: no redirect, subscription already active
+  if (data.success) {
+    alert("Subscription activated successfully 🎉");
+    window.location.href = "/dashboard/subscription";
+    return;
+  }
 
-  return (
-    <div className="dashboard-section">
-      <h2>📦 Subscription Plans</h2>
-
-      {plans.length === 0 && <p>No plans available</p>}
-
-      {plans.map(plan => (
-        <div key={plan._id} style={{ marginBottom: 16 }}>
-          <h3>{plan.name}</h3>
-          <p>₹{plan.price}</p>
-          <p>{plan.durationDays} days</p>
-          <button onClick={() => payNow(plan._id)}>
-            Pay Now
-          </button>
-        </div>
-      ))}
-    </div>
-  );
+  // ✅ REAL PAYMENT MODE (later)
+  if (data.url) {
+    window.location.href = data.url;
+  }
 }
