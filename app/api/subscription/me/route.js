@@ -15,14 +15,14 @@ export async function GET() {
     await dbConnect();
 
     const subscription = await Subscription.findOne({
-      user: decoded.userId,        // ✅ MUST MATCH
+      user: decoded.userId,
       status: "active",
       expiresAt: { $gt: new Date() },
     }).populate("plan");
 
     return Response.json({ subscription });
   } catch (err) {
-    console.error("SUBSCRIPTION ME ERROR:", err);
+    console.error("SUBSCRIPTION FETCH ERROR:", err);
     return Response.json({ subscription: null });
   }
 }
