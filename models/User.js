@@ -14,7 +14,7 @@ const UserSchema = new mongoose.Schema(
 
     phone: {
       type: String,
-      unique: true,          // ✅ REQUIRED
+      unique: true,
       required: true,
       match: /^[6-9]\d{9}$/,
     },
@@ -25,6 +25,23 @@ const UserSchema = new mongoose.Schema(
       type: String,
       enum: ["user", "admin"],
       default: "user",
+    },
+
+    // 🪙 REFER & EARN
+    referralCode: {
+      type: String,
+      unique: true,
+    },
+
+    referredBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+
+    coins: {
+      type: Number,
+      default: 0,
     },
 
     walletBalance: {

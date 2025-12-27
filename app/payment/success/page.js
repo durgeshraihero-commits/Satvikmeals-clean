@@ -12,12 +12,11 @@ function PaymentSuccessInner() {
   useEffect(() => {
     async function activate() {
       const planId = params.get("plan");
-      if (!planId) return;
 
       await fetch("/api/subscription/activate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         credentials: "include",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ planId }),
       });
 
