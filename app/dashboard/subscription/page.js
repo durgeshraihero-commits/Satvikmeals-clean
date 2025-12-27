@@ -1,22 +1,25 @@
 "use client";
+
 import { useEffect, useState } from "react";
 
 export default function SubscriptionPage() {
-  const [subscription, setSubscription] = useState(null);
+  const [sub, setSub] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/subscription/me", { cache: "no-store" })
+    fetch("/api/subscription/me", {
+      cache: "no-store",            // 🔥 IMPORTANT
+    })
       .then(res => res.json())
       .then(data => {
-        setSubscription(data.subscription);
+        setSub(data.subscription);
         setLoading(false);
       });
   }, []);
 
   if (loading) return <p>Loading...</p>;
 
-  if (!subscription) {
+  if (!sub) {
     return (
       <div className="dashboard-section">
         <h2>❌ No Active Subscription</h2>
@@ -30,11 +33,8 @@ export default function SubscriptionPage() {
   return (
     <div className="dashboard-section">
       <h2>✅ Active Subscription</h2>
-      <p><b>Plan:</b> {subscription.plan.name}</p>
-      <p>
-        <b>Valid till:</b>{" "}
-        {new Date(subscription.expiresAt).toDateString()}
-      </p>
+      <p><b>{sub.plan.name}</b></p>
+      <p>Valid till: {new Date(sub.expiresAt).toDateString()}</p>
     </div>
   );
 }
