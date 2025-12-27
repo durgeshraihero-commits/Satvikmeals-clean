@@ -1,23 +1,64 @@
 import dbConnect from "@/lib/mongodb";
 import WeeklyMenu from "@/models/WeeklyMenu";
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
+
+export async function GET() {
+  try {
+    await dbConnect();
+
+    // 🔐 admin check
+    const token = cookies().get("token")?.value;
+    if (!token) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const user = jwt.verify(token, process.env.JWT_SECRET);
+    if (user.role !== "admin") {
+      return Response.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    // ✅ ADMIN MUST SEE ALL MENUS
+    const menus = await WeeklyMenu.find({})
+      .sort({ createdAt: -1 });
+
+    return Response.json(menus);
+  } catch (err) {
+    console.error(err);
+    return Response.json({ error: "Failed to load menus" }, { status: 500 });
+  }
+}
 
 export async function POST(req) {
-  await dbConnect();
+  try {
+    await dbConnect();
+    const { days } = await req.json();
 
-  const { days } = await req.json();
+    // ❗ Unpublish old menus
+    await WeeklyMenu.updateMany({}, { published: false });
 
-  if (!days || days.length === 0) {
-    return Response.json({ error: "Menu empty" }, { status: 400 });
+    const menu = await WeeklyMenu.create({
+      days,
+      published: true,
+    });
+
+    return Response.json({ success: true, menu });
+  } catch (err) {
+    console.error(err);
+    return Response.json({ error: "Publish failed" }, { status: 500 });
   }
+}
 
-  // ❗ Unpublish all old menus
-  await WeeklyMenu.updateMany({}, { published: false });
+export async function DELETE(req) {
+  try {
+    await dbConnect();
+    const { id } = await req.json();
 
-  // ✅ Create & publish new menu
-  const menu = await WeeklyMenu.create({
-    days,
-    published: true,
-  });
+    await WeeklyMenu.findByIdAndDelete(id);
 
-  return Response.json({ success: true, menu });
+    return Response.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    return Response.json({ error: "Delete failed" }, { status: 500 });
+  }
 }
