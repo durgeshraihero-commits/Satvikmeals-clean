@@ -7,18 +7,14 @@ import jwt from "jsonwebtoken";
 export async function POST(req) {
   try {
     const { planId } = await req.json();
-    if (!planId) {
-      return Response.json({ error: "Plan ID missing" }, { status: 400 });
-    }
 
     const token = cookies().get("token")?.value;
     if (!token) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // ✅ CORRECT FIELD
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const userId = decoded.userId;
+    const userId = decoded.userId; // ✅ MUST BE userId
 
     await dbConnect();
 
@@ -32,17 +28,13 @@ export async function POST(req) {
 
     await Subscription.findOneAndUpdate(
       { user: userId },
-      {
-        user: userId,
-        plan: plan._id,
-        expiresAt,
-      },
-      { upsert: true, new: true }
+      { user: userId, plan: plan._id, expiresAt },
+      { upsert: true }
     );
 
     return Response.json({ success: true });
   } catch (err) {
-    console.error("SUB ACTIVATE ERROR:", err);
+    console.error(err);
     return Response.json({ error: "Activation failed" }, { status: 500 });
   }
 }

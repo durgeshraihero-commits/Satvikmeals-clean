@@ -8,7 +8,6 @@ export async function GET() {
     const token = cookies().get("token")?.value;
     if (!token) return Response.json({ subscription: null });
 
-    // ✅ SAME FIX HERE
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decoded.userId;
 
@@ -20,8 +19,7 @@ export async function GET() {
     }).populate("plan");
 
     return Response.json({ subscription });
-  } catch (err) {
-    console.error("SUB ME ERROR:", err);
+  } catch {
     return Response.json({ subscription: null });
   }
 }
