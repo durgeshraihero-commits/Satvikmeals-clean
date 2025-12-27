@@ -6,7 +6,9 @@ import jwt from "jsonwebtoken";
 export async function GET() {
   try {
     const token = cookies().get("token")?.value;
-    if (!token) return Response.json({ subscription: null });
+    if (!token) {
+      return Response.json({ subscription: null });
+    }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decoded.userId;
@@ -15,11 +17,13 @@ export async function GET() {
 
     const subscription = await Subscription.findOne({
       user: userId,
-      expiresAt: { $gt: new Date() },
+      status: "active",              // ✅ REQUIRED
+      expiresAt: { $gt: new Date() }, // ✅ REQUIRED
     }).populate("plan");
 
     return Response.json({ subscription });
-  } catch {
+  } catch (err) {
+    console.error(err);
     return Response.json({ subscription: null });
   }
 }
