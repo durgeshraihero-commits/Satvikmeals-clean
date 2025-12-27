@@ -10,29 +10,44 @@ export async function POST(req) {
     let { name, email, phone, password, referralCode } = await req.json();
 
     if (!email || !phone || !password) {
-      return Response.json({ error: "Missing fields" }, { status: 400 });
+      return Response.json(
+        { error: "Missing fields" },
+        { status: 400 }
+      );
     }
 
+    // ✅ Normalize email
     email = email.trim().toLowerCase();
-    phone = phone.replace(/\D/g, "");
 
+    // ✅ Normalize phone → ALWAYS last 10 digits
+    phone = phone.replace(/\D/g, "");
+    if (phone.length > 10) {
+      phone = phone.slice(-10);
+    }
+
+    // ✅ Check existing user (email OR phone)
     const exists = await User.findOne({
       $or: [{ email }, { phone }],
     });
 
     if (exists) {
-      return Response.json({ error: "User already exists" }, { status: 409 });
+      return Response.json(
+        { error: "User already exists" },
+        { status: 409 }
+      );
     }
 
+    // ✅ Referral handling
     let referredByUser = null;
-
     if (referralCode) {
       referredByUser = await User.findOne({ referralCode });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    const myReferralCode = crypto.randomBytes(4).toString("hex").toUpperCase();
+    const myReferralCode = crypto
+      .randomBytes(4)
+      .toString("hex")
+      .toUpperCase();
 
     await User.create({
       name,
@@ -44,8 +59,21 @@ export async function POST(req) {
     });
 
     return Response.json({ success: true });
+
   } catch (err) {
     console.error("REGISTER ERROR:", err);
-    return Response.json({ error: "Registration failed" }, { status: 500 });
+
+    // ✅ Handle MongoDB duplicate key error properly
+    if (err.code === 11000) {
+      return Response.json(
+        { error: "User already exists" },
+        { status: 409 }
+      );
+    }
+
+    return Response.json(
+      { error: "Registration failed" },
+      { status: 500 }
+    );
   }
 }

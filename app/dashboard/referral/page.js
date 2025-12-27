@@ -3,17 +3,35 @@
 import { useEffect, useState } from "react";
 
 export default function ReferralPage() {
-  const [code, setCode] = useState("");
+  const [referralCode, setReferralCode] = useState("");
   const [coins, setCoins] = useState(0);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    fetch("/api/user/me")
-      .then(r => r.json())
-      .then(d => {
-        setCode(d.referralCode);
-        setCoins(d.coins);
+    async function fetchReferral() {
+      const res = await fetch("/api/user/me", {
+        credentials: "include",
       });
+
+      const data = await res.json();
+
+      if (data?.user) {
+        setReferralCode(data.user.referralCode);
+        setCoins(data.user.walletBalance || 0);
+      }
+    }
+
+    fetchReferral();
   }, []);
+
+  function copyCode() {
+    if (!referralCode) return;
+
+    navigator.clipboard.writeText(referralCode);
+    setCopied(true);
+
+    setTimeout(() => setCopied(false), 2000);
+  }
 
   return (
     <div className="dashboard-section">
@@ -26,16 +44,24 @@ export default function ReferralPage() {
 
       <div className="ref-box">
         <p>Your Referral Code</p>
-        <h3>{code}</h3>
-        <button onClick={() => navigator.clipboard.writeText(code)}>
-          Copy Code
+
+        <h3 style={{ letterSpacing: 2 }}>
+          {referralCode || "Loading..."}
+        </h3>
+
+        <button className="copy-btn" onClick={copyCode}>
+          {copied ? "✅ Copied!" : "📋 Copy Code"}
         </button>
       </div>
 
-      <p className="note">
-        🪙 Available Coins: <strong>{coins}</strong><br />
-        100 coins = ₹100 discount on next subscription.
-      </p>
+      <div style={{ marginTop: 20 }}>
+        <p>
+          🪙 <strong>Available Coins:</strong> {coins}
+        </p>
+        <p className="note">
+          100 coins = ₹100 discount on your next 1-month subscription.
+        </p>
+      </div>
     </div>
   );
 }
