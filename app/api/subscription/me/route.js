@@ -1,11 +1,14 @@
 import dbConnect from "@/lib/mongodb";
 import Subscription from "@/models/Subscription";
-import User from "@/models/User";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
+    await dbConnect();
+
     const token = cookies().get("token")?.value;
     if (!token) {
       return Response.json({ subscription: null });
@@ -13,24 +16,16 @@ export async function GET() {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    await dbConnect();
-
-    // 🔑 FIX: find user using EMAIL from JWT
-    const user = await User.findOne({ email: decoded.email });
-    if (!user) {
-      return Response.json({ subscription: null });
-    }
-
-    // 🔑 FIX: now query subscription using user._id
+    // 🔥 IMPORTANT FIX:
+    // Match by EMAIL (most stable, you ARE saving email)
     const subscription = await Subscription.findOne({
-      user: user._id,
-      status: "active",
+      email: decoded.email,
       expiresAt: { $gt: new Date() },
-    }).populate("plan");
+    }).sort({ createdAt: -1 });
 
     return Response.json({ subscription });
   } catch (err) {
-    console.error("SUBSCRIPTION FETCH ERROR:", err);
+    console.error("SUBSCRIPTION ME ERROR:", err);
     return Response.json({ subscription: null });
   }
 }
