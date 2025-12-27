@@ -4,6 +4,7 @@ import User from "@/models/User";
 import axios from "axios";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
+import { notifyAdmin } from "@/lib/notifyAdmin";
 
 export async function POST(req) {
   try {
@@ -33,6 +34,18 @@ export async function POST(req) {
     if (!plan) {
       return Response.json({ error: "Plan not found" }, { status: 404 });
     }
+
+    // 🔔 ADMIN NOTIFICATION
+    await notifyAdmin(
+      `📦 Subscription Payment Initiated
+
+👤 Name: ${user.name || "N/A"}
+📧 Email: ${user.email}
+📞 Phone: ${user.phone}
+
+📋 Plan: ${plan.name}
+💰 Amount: ₹${plan.price}`
+    );
 
     const response = await axios.post(
       "https://www.instamojo.com/api/1.1/payment-requests/",

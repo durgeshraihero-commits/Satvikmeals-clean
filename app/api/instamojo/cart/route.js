@@ -3,6 +3,7 @@ import Cart from "@/models/Cart";
 import User from "@/models/User";
 import { getUserFromToken } from "@/lib/auth";
 import axios from "axios";
+import { notifyAdmin } from "@/lib/notifyAdmin";
 
 export async function POST() {
   try {
@@ -13,7 +14,6 @@ export async function POST() {
       return Response.json({ error: "Not logged in" }, { status: 401 });
     }
 
-    // 🔹 Fetch user from DB
     const user = await User.findOne({ email: tokenUser.email });
     if (!user || !user.phone) {
       return Response.json(
@@ -22,19 +22,34 @@ export async function POST() {
       );
     }
 
-    // 🔹 Fetch cart
     const cart = await Cart.findOne({ userEmail: tokenUser.email });
     if (!cart || cart.items.length === 0) {
       return Response.json({ error: "Cart is empty" }, { status: 400 });
     }
 
-    // 🔹 Calculate total
     const amount = cart.items.reduce(
       (sum, i) => sum + Number(i.price) * i.quantity,
       0
     );
 
-    // 🔹 Create Instamojo payment
+    const itemsText = cart.items
+      .map(i => `- ${i.name} × ${i.quantity}`)
+      .join("\n");
+
+    // 🔔 ADMIN NOTIFICATION
+    await notifyAdmin(
+      `🛒 Cart Payment Initiated
+
+👤 Name: ${user.name || "N/A"}
+📧 Email: ${user.email}
+📞 Phone: ${user.phone}
+
+📦 Items:
+${itemsText}
+
+💰 Amount: ₹${amount}`
+    );
+
     const res = await axios.post(
       "https://www.instamojo.com/api/1.1/payment-requests/",
       {
@@ -59,10 +74,8 @@ export async function POST() {
     return Response.json({
       url: res.data.payment_request.longurl,
     });
-
   } catch (err) {
     console.error("Instamojo Error:", err.response?.data || err.message);
-
     return Response.json(
       { error: "Payment gateway error" },
       { status: 500 }
