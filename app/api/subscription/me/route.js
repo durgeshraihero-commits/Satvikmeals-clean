@@ -15,8 +15,8 @@ export async function GET() {
     await dbConnect();
 
     const subscription = await Subscription.findOne({
-      user: decoded.userId,      // ✅ MUST MATCH DB
-      status: "active",          // ✅ MUST MATCH DB
+      user: decoded.userId,            // ✅ THIS IS THE KEY
+      status: "active",
       expiresAt: { $gt: new Date() },
     }).populate("plan");
 
