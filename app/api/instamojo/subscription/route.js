@@ -1,10 +1,9 @@
 import dbConnect from "@/lib/mongodb";
 import Plan from "@/models/Plan";
-import Subscription from "@/models/Subscription";
 import User from "@/models/User";
+import Subscription from "@/models/Subscription";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
-import { DEV_MODE } from "@/lib/config";
 
 export async function POST(req) {
   try {
@@ -33,33 +32,25 @@ export async function POST(req) {
       return Response.json({ error: "Plan not found" }, { status: 404 });
     }
 
-    // 🧪 DEV MODE (NO PAYMENT, NO MONEY)
-    if (DEV_MODE) {
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + plan.durationDays);
+    // 🔥 CALCULATE EXPIRY
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + plan.durationDays);
 
-      await Subscription.findOneAndUpdate(
-        { email: user.email },
-        {
-          email: user.email,
-          plan: plan.name,
-          expiresAt,
-        },
-        { upsert: true }
-      );
+    // 🔥 REMOVE OLD SUBSCRIPTION (optional but clean)
+    await Subscription.deleteMany({ user: user._id });
 
-      return Response.json({
-        success: true,
-        message: "Subscription activated (DEV MODE)",
-      });
-    }
+    // 🔥 SAVE SUBSCRIPTION
+    await Subscription.create({
+      user: user._id,
+      plan: plan._id,
+      expiresAt,
+    });
 
-    return Response.json(
-      { error: "Real payments disabled in DEV mode" },
-      { status: 400 }
-    );
+    return Response.json({
+      success: true,
+    });
   } catch (err) {
     console.error("SUBSCRIPTION ERROR:", err);
-    return Response.json({ error: "Server error" }, { status: 500 });
+    return Response.json({ error: "Subscription failed" }, { status: 500 });
   }
 }
