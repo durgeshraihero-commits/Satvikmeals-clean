@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 
-export default function PaymentSuccessPage() {
+export const dynamic = "force-dynamic";
+
+function PaymentSuccessInner() {
   const params = useSearchParams();
   const router = useRouter();
 
@@ -26,4 +28,12 @@ export default function PaymentSuccessPage() {
   }, []);
 
   return <p>Activating your subscription...</p>;
+}
+
+export default function PaymentSuccessPage() {
+  return (
+    <Suspense fallback={<p>Processing payment...</p>}>
+      <PaymentSuccessInner />
+    </Suspense>
+  );
 }
