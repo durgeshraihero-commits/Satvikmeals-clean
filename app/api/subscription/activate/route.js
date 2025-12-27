@@ -14,7 +14,6 @@ export async function POST(req) {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const userId = decoded.userId; // ✅ MUST BE userId
 
     await dbConnect();
 
@@ -23,18 +22,21 @@ export async function POST(req) {
       return Response.json({ error: "Plan not found" }, { status: 404 });
     }
 
+    const startsAt = new Date();
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + plan.durationDays);
 
-    await Subscription.findOneAndUpdate(
-      { user: userId },
-      { user: userId, plan: plan._id, expiresAt },
-      { upsert: true }
-    );
+    await Subscription.create({
+      user: decoded.userId,
+      plan: plan._id,
+      status: "active",
+      startsAt,
+      expiresAt,
+    });
 
     return Response.json({ success: true });
   } catch (err) {
-    console.error(err);
+    console.error("ACTIVATE SUB ERROR:", err);
     return Response.json({ error: "Activation failed" }, { status: 500 });
   }
 }

@@ -1,35 +1,29 @@
 "use client";
 
-import { Suspense, useEffect } from "react";
+import { useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 
-function SuccessInner() {
+export default function PaymentSuccessPage() {
   const params = useSearchParams();
   const router = useRouter();
 
   useEffect(() => {
-    // optional: read params
-    const type = params.get("type");
-    const plan = params.get("plan");
+    async function activate() {
+      const planId = params.get("plan");
+      if (!planId) return;
 
-    // redirect after success
-    setTimeout(() => {
+      await fetch("/api/subscription/activate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ planId }),
+      });
+
       router.replace("/dashboard/subscription");
-    }, 2000);
-  }, [params, router]);
+    }
 
-  return (
-    <div style={{ padding: 30, textAlign: "center" }}>
-      <h2>✅ Payment Successful</h2>
-      <p>Activating your subscription…</p>
-    </div>
-  );
-}
+    activate();
+  }, []);
 
-export default function PaymentSuccessPage() {
-  return (
-    <Suspense fallback={<p>Processing payment...</p>}>
-      <SuccessInner />
-    </Suspense>
-  );
+  return <p>Activating your subscription...</p>;
 }

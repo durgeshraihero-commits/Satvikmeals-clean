@@ -1,14 +1,13 @@
 import dbConnect from "@/lib/mongodb";
 import Plan from "@/models/Plan";
 import User from "@/models/User";
-import Subscription from "@/models/Subscription";
+import axios from "axios";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 
 export async function POST(req) {
   try {
     const { planId } = await req.json();
-
     if (!planId) {
       return Response.json({ error: "Plan ID missing" }, { status: 400 });
     }
@@ -23,8 +22,11 @@ export async function POST(req) {
     await dbConnect();
 
     const user = await User.findById(decoded.userId);
-    if (!user) {
-      return Response.json({ error: "User not found" }, { status: 404 });
+    if (!user || !user.phone) {
+      return Response.json(
+        { error: "User phone number missing" },
+        { status: 400 }
+      );
     }
 
     const plan = await Plan.findById(planId);
@@ -32,25 +34,31 @@ export async function POST(req) {
       return Response.json({ error: "Plan not found" }, { status: 404 });
     }
 
-    // 🔥 CALCULATE EXPIRY
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + plan.durationDays);
-
-    // 🔥 REMOVE OLD SUBSCRIPTION (optional but clean)
-    await Subscription.deleteMany({ user: user._id });
-
-    // 🔥 SAVE SUBSCRIPTION
-    await Subscription.create({
-      user: user._id,
-      plan: plan._id,
-      expiresAt,
-    });
+    const response = await axios.post(
+      "https://www.instamojo.com/api/1.1/payment-requests/",
+      {
+        purpose: `SatvikMeals Subscription - ${plan.name}`,
+        amount: plan.price.toString(),
+        buyer_name: user.name || "SatvikMeals User",
+        email: user.email,
+        phone: user.phone,
+        redirect_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/success?plan=${plan._id}`,
+        send_email: false,
+        send_sms: false,
+      },
+      {
+        headers: {
+          "X-Api-Key": process.env.INSTAMOJO_API_KEY,
+          "X-Auth-Token": process.env.INSTAMOJO_AUTH_TOKEN,
+        },
+      }
+    );
 
     return Response.json({
-      success: true,
+      url: response.data.payment_request.longurl,
     });
   } catch (err) {
-    console.error("SUBSCRIPTION ERROR:", err);
-    return Response.json({ error: "Subscription failed" }, { status: 500 });
+    console.error("INSTAMOJO ERROR:", err?.response?.data || err);
+    return Response.json({ error: "Payment failed" }, { status: 500 });
   }
 }
