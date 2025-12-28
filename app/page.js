@@ -1,6 +1,18 @@
 "use client";
 
 import Link from "next/link";
+import {
+  Calendar,
+  Plus,
+  Package,
+  Gift,
+  Receipt,
+  Headphones,
+  Leaf,
+  ChefHat,
+  Clock,
+  ShieldCheck,
+} from "lucide-react";
 
 export default function HomePage() {
   return (
@@ -8,13 +20,14 @@ export default function HomePage() {
 
       {/* ================= HERO ================= */}
       <section className="home-hero">
-        {/* Background Image */}
+        {/* Image */}
         <img
           src="/images/banner.jpg"
           alt="SatvikMeals Home Style Food"
+          className="hero-img"
         />
 
-        {/* Soft Overlay */}
+        {/* Gradient Overlay */}
         <div className="hero-overlay" />
 
         {/* Content */}
@@ -44,19 +57,15 @@ export default function HomePage() {
       {/* ================= QUICK ACTIONS ================= */}
       <section className="home-actions">
         {[
-          { label: "Weekly Menu", icon: "📅", href: "/menu" },
-          { label: "Add Extra Items", icon: "➕", href: "/dashboard/addons" },
-          { label: "My Subscription", icon: "🍱", href: "/dashboard/subscription" },
-          { label: "Refer & Earn", icon: "🎁", href: "/dashboard/referral" },
-          { label: "Payments", icon: "🧾", href: "/dashboard/payments" },
-          { label: "Support", icon: "🎧", href: "/dashboard/complaint" },
+          { label: "Weekly Menu", icon: Calendar, href: "/menu" },
+          { label: "Add Extra Items", icon: Plus, href: "/dashboard/addons" },
+          { label: "My Subscription", icon: Package, href: "/dashboard/subscription" },
+          { label: "Refer & Earn", icon: Gift, href: "/dashboard/referral" },
+          { label: "Payments", icon: Receipt, href: "/dashboard/payments" },
+          { label: "Support", icon: Headphones, href: "/dashboard/complaint" },
         ].map((item, i) => (
-          <Link
-            key={i}
-            href={item.href}
-            className="action-card"
-          >
-            <span>{item.icon}</span>
+          <Link key={i} href={item.href} className="action-card">
+            <item.icon size={26} strokeWidth={1.8} />
             <p>{item.label}</p>
           </Link>
         ))}
@@ -67,7 +76,6 @@ export default function HomePage() {
         <h2>Affordable Meal Plans</h2>
 
         <div className="pricing-row">
-          {/* Daily */}
           <div className="price-card">
             <span className="tag">Try Once</span>
             <h3>Daily Meal</h3>
@@ -81,7 +89,6 @@ export default function HomePage() {
             </Link>
           </div>
 
-          {/* Monthly */}
           <div className="price-card highlight">
             <span className="tag popular">Most Popular</span>
             <h3>1 Month Plan</h3>
@@ -95,7 +102,6 @@ export default function HomePage() {
             </Link>
           </div>
 
-          {/* 2 Month */}
           <div className="price-card">
             <span className="tag">Best Value</span>
             <h3>2 Month Plan</h3>
@@ -114,14 +120,14 @@ export default function HomePage() {
       {/* ================= TRUST STRIP ================= */}
       <section className="home-trust">
         {[
-          ["🌿", "100% Veg"],
-          ["👨‍🍳", "Home Style"],
-          ["🕒", "Fresh Daily"],
-          ["🛡️", "Hygienic"],
+          { icon: Leaf, text: "100% Veg" },
+          { icon: ChefHat, text: "Home Style" },
+          { icon: Clock, text: "Fresh Daily" },
+          { icon: ShieldCheck, text: "Hygienic" },
         ].map((item, i) => (
           <div key={i} className="trust-item">
-            <span>{item[0]}</span>
-            <p>{item[1]}</p>
+            <item.icon size={22} strokeWidth={1.8} />
+            <p>{item.text}</p>
           </div>
         ))}
       </section>

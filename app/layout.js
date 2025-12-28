@@ -2,9 +2,17 @@ import "./globals.css";
 import Link from "next/link";
 import { getUserFromToken } from "@/lib/auth";
 import LogoutButton from "./components/LogoutButton";
-import PageLoader from "./components/PageLoader"; // ✅ ADD THIS
+import PageLoader from "./components/PageLoader";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
+
+import {
+  Home,
+  Utensils,
+  User as UserIcon,
+  ShoppingCart,
+  Coins,
+} from "lucide-react";
 
 export const metadata = {
   title: "SatvikMeals",
@@ -28,13 +36,13 @@ export default async function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        {/* 🔄 GLOBAL PAGE LOADER (YouTube-style) */}
+        {/* 🔄 GLOBAL PAGE LOADER */}
         <PageLoader />
 
-        {/* ================= TOP PERSONAL HEADER ================= */}
+        {/* ================= TOP HEADER ================= */}
         <header className="navbar">
           <div className="nav-container">
-            {/* LEFT: BRAND + GREETING */}
+            {/* LEFT */}
             <div>
               <div className="logo">🌿 SatvikMeals</div>
               {user && (
@@ -44,11 +52,12 @@ export default async function RootLayout({ children }) {
               )}
             </div>
 
-            {/* RIGHT: COINS + CART + AUTH */}
+            {/* RIGHT */}
             <div className="nav-actions">
               {user && (
                 <div className="coin-pill">
-                  🪙 <span>{coins}</span>
+                  <Coins size={14} />
+                  <span>{coins}</span>
                   {coins < 100 && (
                     <Link
                       href="/dashboard/referral"
@@ -61,7 +70,7 @@ export default async function RootLayout({ children }) {
               )}
 
               <Link href="/cart" className="cart-btn">
-                🛒
+                <ShoppingCart size={16} />
               </Link>
 
               {!user && (
@@ -78,7 +87,7 @@ export default async function RootLayout({ children }) {
         {/* ================= PAGE CONTENT ================= */}
         <main className="container">{children}</main>
 
-        {/* ================= BOTTOM FLOATING NAV (APP FEEL) ================= */}
+        {/* ================= BOTTOM APP NAV ================= */}
         {user && (
           <nav
             style={{
@@ -86,38 +95,42 @@ export default async function RootLayout({ children }) {
               bottom: 0,
               left: 0,
               right: 0,
+              height: 64,
               background: "#ffffff",
               borderTop: "1px solid #e5e7eb",
               display: "flex",
               justifyContent: "space-around",
               alignItems: "center",
-              padding: "10px 0",
               zIndex: 999,
             }}
           >
             {/* HOME */}
-            <Link href="/dashboard" style={{ fontSize: 18 }}>
-              🏠
+            <Link href="/dashboard" style={{ color: "#14532d" }}>
+              <Home size={22} />
             </Link>
 
-            {/* CENTER ACTION (MENU / ORDER) */}
+            {/* CENTER FOOD ACTION */}
             <Link
               href="/menu"
               style={{
-                background: "#f59e0b",
-                padding: 16,
+                background: "#16a34a",
+                width: 56,
+                height: 56,
                 borderRadius: "50%",
-                marginTop: -32,
+                marginTop: -28,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
                 boxShadow: "0 12px 24px rgba(0,0,0,0.25)",
-                fontSize: 20,
+                color: "#ffffff",
               }}
             >
-              🍱
+              <Utensils size={26} />
             </Link>
 
             {/* ACCOUNT */}
-            <Link href="/dashboard" style={{ fontSize: 18 }}>
-              👤
+            <Link href="/dashboard" style={{ color: "#14532d" }}>
+              <UserIcon size={22} />
             </Link>
           </nav>
         )}

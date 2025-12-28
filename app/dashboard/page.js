@@ -2,6 +2,20 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 
+import {
+  Calendar,
+  Package,
+  Plus,
+  Gift,
+  Receipt,
+  Headphones,
+  CreditCard,
+  ChefHat,
+  Users,
+  MessageSquare,
+  IndianRupee,
+} from "lucide-react";
+
 export default function Dashboard() {
   const token = cookies().get("token")?.value;
   if (!token) return <h1>Unauthorized</h1>;
@@ -19,9 +33,7 @@ export default function Dashboard() {
       {/* ================= HEADER ================= */}
       <div className="dash-header">
         <div>
-          <h1 className="dash-greeting">
-            Namaste{user?.email ? "," : ""} 👋
-          </h1>
+          <h1 className="dash-greeting">Namaste</h1>
           <p className="dash-sub">
             Welcome back to <b>SatvikMeals</b>
           </p>
@@ -32,37 +44,37 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ================= USER ACTIONS ================= */}
+      {/* ================= USER SERVICES ================= */}
       <h2 className="dash-section-title">Your Services</h2>
 
       <div className="dashboard-grid">
         <Link href="/menu" className="dash-card">
-          <span>📅</span>
+          <Calendar size={26} strokeWidth={1.8} />
           <p>Weekly Menu</p>
         </Link>
 
         <Link href="/dashboard/subscription" className="dash-card">
-          <span>🍱</span>
+          <Package size={26} strokeWidth={1.8} />
           <p>My Subscription</p>
         </Link>
 
         <Link href="/dashboard/addons" className="dash-card">
-          <span>➕</span>
+          <Plus size={26} strokeWidth={1.8} />
           <p>Add Extra Items</p>
         </Link>
 
         <Link href="/dashboard/referral" className="dash-card">
-          <span>🎁</span>
+          <Gift size={26} strokeWidth={1.8} />
           <p>Refer & Earn</p>
         </Link>
 
         <Link href="/dashboard/payments" className="dash-card">
-          <span>🧾</span>
+          <Receipt size={26} strokeWidth={1.8} />
           <p>Payment History</p>
         </Link>
 
         <Link href="/dashboard/complaint" className="dash-card">
-          <span>🎧</span>
+          <Headphones size={26} strokeWidth={1.8} />
           <p>Support</p>
         </Link>
       </div>
@@ -76,32 +88,32 @@ export default function Dashboard() {
 
           <div className="dashboard-grid">
             <Link href="/dashboard/admin/plans" className="dash-card admin">
-              <span>💳</span>
+              <CreditCard size={26} strokeWidth={1.8} />
               <p>Manage Plans</p>
             </Link>
 
             <Link href="/admin/weekly-menu" className="dash-card admin">
-              <span>👨‍🍳</span>
+              <ChefHat size={26} strokeWidth={1.8} />
               <p>Weekly Menu</p>
             </Link>
 
             <Link href="/admin/addons" className="dash-card admin">
-              <span>➕</span>
+              <Plus size={26} strokeWidth={1.8} />
               <p>Add-ons</p>
             </Link>
 
             <Link href="/admin/users" className="dash-card admin">
-              <span>👥</span>
+              <Users size={26} strokeWidth={1.8} />
               <p>Users</p>
             </Link>
 
             <Link href="/admin/complaints" className="dash-card admin">
-              <span>📩</span>
+              <MessageSquare size={26} strokeWidth={1.8} />
               <p>Complaints</p>
             </Link>
 
             <Link href="/admin/payments" className="dash-card admin">
-              <span>💰</span>
+              <IndianRupee size={26} strokeWidth={1.8} />
               <p>Payments</p>
             </Link>
           </div>
