@@ -6,14 +6,6 @@ import PageLoader from "./components/PageLoader";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 
-import {
-  Home,
-  Utensils,
-  User as UserIcon,
-  ShoppingCart,
-  Coins,
-} from "lucide-react";
-
 export const metadata = {
   title: "SatvikMeals",
   description: "Pure Veg • Home Style • Monthly Meals",
@@ -25,7 +17,6 @@ export default async function RootLayout({ children }) {
   let coins = 0;
   let firstName = "";
 
-  // 🔐 SAFE DB READ (NO LOGIC CHANGE)
   if (user?.email) {
     await dbConnect();
     const dbUser = await User.findOne({ email: user.email }).lean();
@@ -36,13 +27,10 @@ export default async function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        {/* 🔄 GLOBAL PAGE LOADER */}
         <PageLoader />
 
-        {/* ================= TOP HEADER ================= */}
         <header className="navbar">
           <div className="nav-container">
-            {/* LEFT */}
             <div>
               <div className="logo">🌿 SatvikMeals</div>
               {user && (
@@ -52,12 +40,10 @@ export default async function RootLayout({ children }) {
               )}
             </div>
 
-            {/* RIGHT */}
             <div className="nav-actions">
               {user && (
                 <div className="coin-pill">
-                  <Coins size={14} />
-                  <span>{coins}</span>
+                  🪙 <span>{coins}</span>
                   {coins < 100 && (
                     <Link
                       href="/dashboard/referral"
@@ -70,7 +56,7 @@ export default async function RootLayout({ children }) {
               )}
 
               <Link href="/cart" className="cart-btn">
-                <ShoppingCart size={16} />
+                🛒
               </Link>
 
               {!user && (
@@ -84,10 +70,8 @@ export default async function RootLayout({ children }) {
           </div>
         </header>
 
-        {/* ================= PAGE CONTENT ================= */}
         <main className="container">{children}</main>
 
-        {/* ================= BOTTOM APP NAV ================= */}
         {user && (
           <nav
             style={{
@@ -95,42 +79,35 @@ export default async function RootLayout({ children }) {
               bottom: 0,
               left: 0,
               right: 0,
-              height: 64,
               background: "#ffffff",
               borderTop: "1px solid #e5e7eb",
               display: "flex",
               justifyContent: "space-around",
               alignItems: "center",
+              padding: "10px 0",
               zIndex: 999,
             }}
           >
-            {/* HOME */}
-            <Link href="/dashboard" style={{ color: "#14532d" }}>
-              <Home size={22} />
+            <Link href="/dashboard" style={{ fontSize: 18 }}>
+              🏠
             </Link>
 
-            {/* CENTER FOOD ACTION */}
             <Link
               href="/menu"
               style={{
-                background: "#16a34a",
-                width: 56,
-                height: 56,
+                background: "#f59e0b",
+                padding: 16,
                 borderRadius: "50%",
-                marginTop: -28,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+                marginTop: -32,
                 boxShadow: "0 12px 24px rgba(0,0,0,0.25)",
-                color: "#ffffff",
+                fontSize: 20,
               }}
             >
-              <Utensils size={26} />
+              🍱
             </Link>
 
-            {/* ACCOUNT */}
-            <Link href="/dashboard" style={{ color: "#14532d" }}>
-              <UserIcon size={22} />
+            <Link href="/dashboard" style={{ fontSize: 18 }}>
+              👤
             </Link>
           </nav>
         )}

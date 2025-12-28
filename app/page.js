@@ -1,25 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import {
-  Calendar,
-  Plus,
-  Package,
-  Gift,
-  Receipt,
-  Headphones,
-} from "lucide-react";
 
 export default function HomePage() {
   return (
     <main className="home">
 
-      {/* ================= HERO ================= */}
       <section className="home-hero">
         <img
           src="/images/banner.jpg"
           alt="SatvikMeals Home Style Food"
-          className="hero-img"
         />
 
         <div className="hero-overlay" />
@@ -47,37 +37,35 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ================= QUICK ACTIONS ================= */}
       <section className="home-actions">
         {[
-          { label: "Weekly Menu", icon: Calendar, href: "/menu" },
-          { label: "Add Extra Items", icon: Plus, href: "/dashboard/addons" },
-          { label: "My Subscription", icon: Package, href: "/dashboard/subscription" },
-          { label: "Refer & Earn", icon: Gift, href: "/dashboard/referral" },
-          { label: "Payments", icon: Receipt, href: "/dashboard/payments" },
-          { label: "Support", icon: Headphones, href: "/dashboard/complaint" },
+          { label: "Weekly Menu", icon: "📅", href: "/menu" },
+          { label: "Add Extra Items", icon: "➕", href: "/dashboard/addons" },
+          { label: "My Subscription", icon: "🍱", href: "/dashboard/subscription" },
+          { label: "Refer & Earn", icon: "🎁", href: "/dashboard/referral" },
+          { label: "Payments", icon: "🧾", href: "/dashboard/payments" },
+          { label: "Support", icon: "🎧", href: "/dashboard/complaint" },
         ].map((item, i) => (
-          <Link key={i} href={item.href} className="action-card">
-            <item.icon size={24} strokeWidth={1.8} />
+          <Link
+            key={i}
+            href={item.href}
+            className="action-card"
+          >
+            <span>{item.icon}</span>
             <p>{item.label}</p>
           </Link>
         ))}
       </section>
 
-      {/* ================= PRICING ================= */}
       <section className="home-pricing">
         <h2>Affordable Meal Plans</h2>
 
         <div className="pricing-row">
-
-          {/* DAILY */}
           <div className="price-card">
             <span className="tag">Try Once</span>
             <h3>Daily Meal</h3>
             <p className="price">₹59</p>
-            <small style={{ marginBottom: 14, display: "block" }}>
-              Perfect for trial
-            </small>
+            <small>Perfect for trial</small>
 
             <Link href="/subscribe">
               <button className="btn gold">
@@ -86,14 +74,11 @@ export default function HomePage() {
             </Link>
           </div>
 
-          {/* MONTHLY */}
           <div className="price-card highlight">
             <span className="tag popular">Most Popular</span>
             <h3>1 Month Plan</h3>
             <p className="price">₹3099</p>
-            <small style={{ marginBottom: 14, display: "block" }}>
-              Only ₹50 / meal
-            </small>
+            <small>Only ₹50 / meal</small>
 
             <Link href="/subscribe">
               <button className="btn green">
@@ -102,14 +87,11 @@ export default function HomePage() {
             </Link>
           </div>
 
-          {/* 2 MONTH */}
           <div className="price-card">
             <span className="tag">Best Value</span>
             <h3>2 Month Plan</h3>
             <p className="price">₹5999</p>
-            <small style={{ marginBottom: 14, display: "block" }}>
-              Save ₹1200+
-            </small>
+            <small>Save ₹1200+</small>
 
             <Link href="/subscribe">
               <button className="btn green">
@@ -117,11 +99,9 @@ export default function HomePage() {
               </button>
             </Link>
           </div>
-
         </div>
       </section>
 
-      {/* ================= TRUST STRIP ================= */}
       <section className="home-trust">
         {[
           ["🌿", "100% Veg"],
@@ -136,7 +116,6 @@ export default function HomePage() {
         ))}
       </section>
 
-      {/* ================= CONTACT ================= */}
       <section className="home-contact">
         <h2>Contact Us</h2>
         <p>📍 Patna, Bihar</p>
@@ -144,7 +123,6 @@ export default function HomePage() {
         <p>⏰ Lunch & Dinner Service</p>
       </section>
 
-      {/* ================= FOOTER ================= */}
       <footer className="home-footer">
         © 2025 SatvikMeals • Pure Veg • Home Style
       </footer>
