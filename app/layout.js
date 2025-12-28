@@ -2,13 +2,18 @@ import "./globals.css";
 import Link from "next/link";
 import { getUserFromToken } from "@/lib/auth";
 import LogoutButton from "./components/LogoutButton";
-import PageLoader from "./components/PageLoader"; // ✅ ADD THIS
+import PageLoader from "./components/PageLoader";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 
 export const metadata = {
   title: "SatvikMeals",
   description: "Pure Veg • Home Style • Monthly Meals",
+
+  // ✅ GOOGLE SEARCH CONSOLE VERIFICATION
+  verification: {
+    google: "266drBgYK_lmxlFprc1zFFhhTnWHXySQjtUgS0GKyW8",
+  },
 };
 
 export default async function RootLayout({ children }) {
@@ -28,7 +33,7 @@ export default async function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        {/* 🔄 GLOBAL PAGE LOADER (YouTube-style) */}
+        {/* 🔄 GLOBAL PAGE LOADER */}
         <PageLoader />
 
         {/* ================= TOP PERSONAL HEADER ================= */}
@@ -78,7 +83,7 @@ export default async function RootLayout({ children }) {
         {/* ================= PAGE CONTENT ================= */}
         <main className="container">{children}</main>
 
-        {/* ================= BOTTOM FLOATING NAV (APP FEEL) ================= */}
+        {/* ================= BOTTOM FLOATING NAV ================= */}
         {user && (
           <nav
             style={{
@@ -95,12 +100,10 @@ export default async function RootLayout({ children }) {
               zIndex: 999,
             }}
           >
-            {/* HOME */}
             <Link href="/dashboard" style={{ fontSize: 18 }}>
               🏠
             </Link>
 
-            {/* CENTER ACTION (MENU / ORDER) */}
             <Link
               href="/menu"
               style={{
@@ -115,7 +118,6 @@ export default async function RootLayout({ children }) {
               🍱
             </Link>
 
-            {/* ACCOUNT */}
             <Link href="/dashboard" style={{ fontSize: 18 }}>
               👤
             </Link>
