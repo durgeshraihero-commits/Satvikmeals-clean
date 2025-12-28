@@ -6,15 +6,40 @@ import PageLoader from "./components/PageLoader";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 
+/* ================= SEO METADATA ================= */
 export const metadata = {
-  title: "SatvikMeals",
-  description: "Pure Veg • Home Style • Monthly Meals",
+  title: {
+    default: "SatvikMeals | Best Pure Veg Tiffin Service in Patna",
+    template: "%s | SatvikMeals Patna",
+  },
 
-  // ✅ GOOGLE SEARCH CONSOLE VERIFICATION
+  description:
+    "Affordable homemade tiffin service in Patna. Pure veg, healthy meals delivered to Anandpuri, Rajapul, and Boring Road. Perfect for students and office goers.",
+
+  keywords: [
+    "Tiffin service Patna",
+    "Veg food delivery Patna",
+    "Homemade tiffin service",
+    "Satvik food",
+    "Student mess Patna",
+    "Lunch service",
+  ],
+
+  /* ✅ GOOGLE SEARCH CONSOLE VERIFICATION */
   verification: {
     google: "266drBgYK_lmxlFprc1zFFhhTnWHXySQjtUgS0GKyW8",
   },
+
+  /* ✅ SOCIAL PREVIEW (WhatsApp / Facebook / LinkedIn) */
+  openGraph: {
+    title: "SatvikMeals - Ghar Jaisa Khana in Patna",
+    description: "Order healthy, pure veg tiffin in Patna just like home.",
+    type: "website",
+    locale: "en_IN",
+    siteName: "SatvikMeals",
+  },
 };
+/* ================= END SEO ================= */
 
 export default async function RootLayout({ children }) {
   const user = getUserFromToken();
