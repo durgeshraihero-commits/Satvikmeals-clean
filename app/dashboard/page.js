@@ -14,66 +14,95 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="dashboard-container">
-      <h1 className="dashboard-title">
-        Welcome to SatvikMeals Dashboard 🌱
-      </h1>
+    <div className="dashboard-wrapper">
 
-      {/* ===== USER DASHBOARD ===== */}
+      {/* ================= HEADER ================= */}
+      <div className="dash-header">
+        <div>
+          <h1 className="dash-greeting">
+            Namaste{user?.email ? "," : ""} 👋
+          </h1>
+          <p className="dash-sub">
+            Welcome back to <b>SatvikMeals</b>
+          </p>
+        </div>
+
+        <div className="dash-avatar">
+          🌿
+        </div>
+      </div>
+
+      {/* ================= USER ACTIONS ================= */}
+      <h2 className="dash-section-title">Your Services</h2>
+
       <div className="dashboard-grid">
-        <Link href="/dashboard/referral" className="dash-card">
-          🎁 Refer & Earn
+        <Link href="/menu" className="dash-card">
+          <span>📅</span>
+          <p>Weekly Menu</p>
         </Link>
 
         <Link href="/dashboard/subscription" className="dash-card">
-          📦 My Subscription
-        </Link>
-
-        <Link href="/menu" className="dash-card">
-          🍱 Weekly Menu
+          <span>🍱</span>
+          <p>My Subscription</p>
         </Link>
 
         <Link href="/dashboard/addons" className="dash-card">
-          ➕ Add Extra Items
+          <span>➕</span>
+          <p>Add Extra Items</p>
         </Link>
 
-        <Link href="/dashboard/complaint" className="dash-card">
-          🎤 Complaint & Support
+        <Link href="/dashboard/referral" className="dash-card">
+          <span>🎁</span>
+          <p>Refer & Earn</p>
         </Link>
 
         <Link href="/dashboard/payments" className="dash-card">
-          💳 Payment History
+          <span>🧾</span>
+          <p>Payment History</p>
+        </Link>
+
+        <Link href="/dashboard/complaint" className="dash-card">
+          <span>🎧</span>
+          <p>Support</p>
         </Link>
       </div>
 
-      {/* ===== ADMIN PANEL ===== */}
+      {/* ================= ADMIN PANEL ================= */}
       {user.role === "admin" && (
         <>
-          <h2 style={{ marginTop: 40 }}>🛠 Admin Panel</h2>
+          <h2 className="dash-section-title admin-title">
+            Admin Controls
+          </h2>
 
           <div className="dashboard-grid">
             <Link href="/dashboard/admin/plans" className="dash-card admin">
-              💳 Manage Plans
+              <span>💳</span>
+              <p>Manage Plans</p>
             </Link>
 
             <Link href="/admin/weekly-menu" className="dash-card admin">
-              🧑‍🍳 Manage Weekly Menu
+              <span>👨‍🍳</span>
+              <p>Weekly Menu</p>
             </Link>
 
             <Link href="/admin/addons" className="dash-card admin">
-              ➕ Manage Add-ons
+              <span>➕</span>
+              <p>Add-ons</p>
             </Link>
 
             <Link href="/admin/users" className="dash-card admin">
-              👥 Users
+              <span>👥</span>
+              <p>Users</p>
             </Link>
 
             <Link href="/admin/complaints" className="dash-card admin">
-              📩 Complaints
+              <span>📩</span>
+              <p>Complaints</p>
             </Link>
 
             <Link href="/admin/payments" className="dash-card admin">
-              💰 Payments
+              <span>💰</span>
+              <p>Payments</p>
             </Link>
           </div>
         </>
