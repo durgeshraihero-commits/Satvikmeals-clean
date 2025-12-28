@@ -69,94 +69,18 @@ p {
   backdrop-filter: blur(10px);
 }
 
-.nav-container {
-  max-width: 1200px;
-  margin: auto;
-  height: 64px;
-  padding: 0 14px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.logo {
-  font-family: "Merriweather", serif;
-  color: var(--green-main);
-  font-weight: 900;
-  font-size: 16px;
-}
-
-.nav-links {
-  display: flex;
-  gap: 14px;
-}
-
-.nav-links a {
-  text-decoration: none;
-  font-weight: 600;
-  color: var(--text-dark);
-}
-
-.nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.cart-btn {
-  background: var(--orange);
-  color: white;
-  padding: 6px 14px;
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.login-btn {
-  background: linear-gradient(135deg, var(--green-main), var(--green-dark));
-  color: white;
-  padding: 6px 16px;
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-/* ================= COINS ================= */
-.coin-pill {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: #fff7ed;
-  border: 1px solid #fde68a;
-  padding: 6px 10px;
-  border-radius: 999px;
-  font-weight: 700;
-  font-size: 13px;
-  color: #92400e;
-}
-
-.recharge-link {
-  margin-left: 6px;
-  font-size: 11px;
-  color: #dc2626;
-  text-decoration: underline;
-}
-
 /* ================= HOME ================= */
 .home {
   padding-bottom: 90px;
 }
 
-/* ================= HERO (FINAL CLEAN VERSION) ================= */
+/* ================= HERO ================= */
 .home-hero {
   position: relative;
-  width: 100%;
   height: 62vh;
   max-height: 500px;
-  overflow: hidden;
   border-radius: 0 0 32px 32px;
+  overflow: hidden;
   margin-bottom: 48px;
 }
 
@@ -172,11 +96,10 @@ p {
   inset: 0;
   background: linear-gradient(
     to bottom,
-    rgba(0,0,0,0.15) 0%,
-    rgba(0,0,0,0.55) 75%,
-    rgba(0,0,0,0.75) 100%
+    rgba(0,0,0,0.15),
+    rgba(0,0,0,0.55),
+    rgba(0,0,0,0.75)
   );
-  z-index: 1;
 }
 
 .hero-content {
@@ -187,27 +110,40 @@ p {
   flex-direction: column;
   justify-content: flex-end;
   align-items: center;
-  text-align: center;
   padding: 0 18px 56px;
-  color: #ffffff;
+  text-align: center;
+  color: white;
 }
 
 .hero-content h1 {
   font-size: 34px;
-  color: #ffffff;
-}
-
-.hero-content p {
-  font-size: 15px;
-  opacity: 0.95;
+  color: #fff;
 }
 
 .hero-actions {
   display: flex;
   gap: 14px;
   margin-top: 22px;
-  flex-wrap: wrap;
-  justify-content: center;
+}
+
+/* ================= BUTTONS ================= */
+.btn {
+  padding: 0.75rem 1.4rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn.gold {
+  background: linear-gradient(135deg, #fb923c, #f59e0b);
+  box-shadow: 0 8px 20px rgba(249,115,22,0.4);
+}
+
+.btn.green {
+  background: linear-gradient(135deg, #22c55e, #15803d);
+  box-shadow: 0 8px 20px rgba(34,197,94,0.4);
 }
 
 /* ================= QUICK ACTIONS ================= */
@@ -219,114 +155,69 @@ p {
 }
 
 .action-card {
-  background: #ffffff;
+  background: white;
   border-radius: 22px;
   padding: 18px 10px;
   text-align: center;
-  box-shadow: var(--shadow-soft);
   text-decoration: none;
-  color: var(--text-dark);
-}
-
-.action-card span {
-  font-size: 24px;
-}
-
-.action-card p {
-  font-size: 13px;
-  font-weight: 600;
-  margin-top: 6px;
-}
-
-/* ================= PRICING ================= */
-.home-pricing {
-  padding: 20px 16px;
-}
-
-.pricing-row {
-  display: flex;
-  gap: 16px;
-  overflow-x: auto;
-}
-
-.price-card {
-  min-width: 220px;
-  background: #ffffff;
-  border-radius: 26px;
-  padding: 18px;
   box-shadow: var(--shadow-soft);
-  text-align: center;
-  position: relative;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.price-card.highlight {
-  border: 2px solid var(--green-main);
+.action-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
 }
 
-.price-card .price {
-  font-size: 30px;
-  font-weight: 800;
-  color: var(--green-main);
-}
-
-.tag {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  background: #fde68a;
-  color: #92400e;
-  font-size: 11px;
-  padding: 4px 8px;
-  border-radius: 999px;
-}
-
-/* ================= TRUST ================= */
-.home-trust {
-  display: flex;
-  justify-content: space-around;
-  padding: 22px 10px;
-  background: #ffffff;
-  border-radius: 30px;
-  box-shadow: var(--shadow-soft);
-  margin: 16px;
-}
-
-/* ================= FOOTER ================= */
-.home-footer {
-  padding: 16px;
-  text-align: center;
-  font-size: 13px;
-  color: #6b7280;
-}
-
-/* ================= MOBILE ================= */
-@media (max-width: 480px) {
-  .nav-links { display: none; }
-  .home-hero { height: 56vh; }
-  .hero-content h1 { font-size: 28px; }
-  .home-actions { grid-template-columns: repeat(2, 1fr); }
-}
-/* ================= ICON POLISH ================= */
-
-/* Quick Actions icons */
 .action-card svg {
   color: var(--green-dark);
   margin-bottom: 6px;
 }
 
-/* Trust strip icons */
-.trust-item svg {
-  color: var(--green-dark);
-  margin-bottom: 4px;
-}
-.action-card {
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+/* ================= PRICING ================= */
+.home-pricing h2 {
+  text-align: center;
+  margin-bottom: 20px;
 }
 
-.action-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-hover);
+.price-card small {
+  display: block;
+  margin-bottom: 14px;
+  color: var(--text-muted);
 }
+
+/* ================= TRUST STRIP ================= */
+.home-trust {
+  display: flex;
+  justify-content: space-around;
+  background: white;
+  padding: 22px 10px;
+  border-radius: 30px;
+  margin: 16px;
+  box-shadow: var(--shadow-soft);
+}
+
+.trust-item span {
+  font-size: 22px;
+}
+
 .trust-item p {
+  font-weight: 600;
+  color: var(--green-dark);
   margin-top: 6px;
+}
+
+/* ================= FOOTER ================= */
+.home-footer {
+  text-align: center;
+  padding: 16px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 480px) {
+  .home-hero { height: 56vh; }
+  .hero-content h1 { font-size: 28px; }
+  .home-actions { grid-template-columns: repeat(2, 1fr); }
 }

@@ -8,10 +8,6 @@ import {
   Gift,
   Receipt,
   Headphones,
-  Leaf,
-  ChefHat,
-  Clock,
-  ShieldCheck,
 } from "lucide-react";
 
 export default function HomePage() {
@@ -20,17 +16,14 @@ export default function HomePage() {
 
       {/* ================= HERO ================= */}
       <section className="home-hero">
-        {/* Image */}
         <img
           src="/images/banner.jpg"
           alt="SatvikMeals Home Style Food"
           className="hero-img"
         />
 
-        {/* Gradient Overlay */}
         <div className="hero-overlay" />
 
-        {/* Content */}
         <div className="hero-content">
           <h1>
             Ghar Jaisa Swad,<br />Delivered.
@@ -65,7 +58,7 @@ export default function HomePage() {
           { label: "Support", icon: Headphones, href: "/dashboard/complaint" },
         ].map((item, i) => (
           <Link key={i} href={item.href} className="action-card">
-            <item.icon size={26} strokeWidth={1.8} />
+            <item.icon size={24} strokeWidth={1.8} />
             <p>{item.label}</p>
           </Link>
         ))}
@@ -76,11 +69,15 @@ export default function HomePage() {
         <h2>Affordable Meal Plans</h2>
 
         <div className="pricing-row">
+
+          {/* DAILY */}
           <div className="price-card">
             <span className="tag">Try Once</span>
             <h3>Daily Meal</h3>
             <p className="price">₹59</p>
-            <small>Perfect for trial</small>
+            <small style={{ marginBottom: 14, display: "block" }}>
+              Perfect for trial
+            </small>
 
             <Link href="/subscribe">
               <button className="btn gold">
@@ -89,11 +86,14 @@ export default function HomePage() {
             </Link>
           </div>
 
+          {/* MONTHLY */}
           <div className="price-card highlight">
             <span className="tag popular">Most Popular</span>
             <h3>1 Month Plan</h3>
             <p className="price">₹3099</p>
-            <small>Only ₹50 / meal</small>
+            <small style={{ marginBottom: 14, display: "block" }}>
+              Only ₹50 / meal
+            </small>
 
             <Link href="/subscribe">
               <button className="btn green">
@@ -102,11 +102,14 @@ export default function HomePage() {
             </Link>
           </div>
 
+          {/* 2 MONTH */}
           <div className="price-card">
             <span className="tag">Best Value</span>
             <h3>2 Month Plan</h3>
             <p className="price">₹5999</p>
-            <small>Save ₹1200+</small>
+            <small style={{ marginBottom: 14, display: "block" }}>
+              Save ₹1200+
+            </small>
 
             <Link href="/subscribe">
               <button className="btn green">
@@ -114,20 +117,21 @@ export default function HomePage() {
               </button>
             </Link>
           </div>
+
         </div>
       </section>
 
       {/* ================= TRUST STRIP ================= */}
       <section className="home-trust">
         {[
-          { icon: Leaf, text: "100% Veg" },
-          { icon: ChefHat, text: "Home Style" },
-          { icon: Clock, text: "Fresh Daily" },
-          { icon: ShieldCheck, text: "Hygienic" },
+          ["🌿", "100% Veg"],
+          ["👨‍🍳", "Home Style"],
+          ["🕒", "Fresh Daily"],
+          ["🛡️", "Hygienic"],
         ].map((item, i) => (
           <div key={i} className="trust-item">
-            <item.icon size={22} strokeWidth={1.8} />
-            <p>{item.text}</p>
+            <span>{item[0]}</span>
+            <p>{item[1]}</p>
           </div>
         ))}
       </section>
