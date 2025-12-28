@@ -15,6 +15,8 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-wrapper">
+
+      {/* ================= HEADER ================= */}
       <div className="dash-header">
         <div>
           <h1 className="dash-greeting">
@@ -25,9 +27,12 @@ export default function Dashboard() {
           </p>
         </div>
 
-        <div className="dash-avatar">🌿</div>
+        <div className="dash-avatar">
+          🌿
+        </div>
       </div>
 
+      {/* ================= USER ACTIONS ================= */}
       <h2 className="dash-section-title">Your Services</h2>
 
       <div className="dashboard-grid">
@@ -62,6 +67,7 @@ export default function Dashboard() {
         </Link>
       </div>
 
+      {/* ================= ADMIN PANEL ================= */}
       {user.role === "admin" && (
         <>
           <h2 className="dash-section-title admin-title">

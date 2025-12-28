@@ -6,14 +6,18 @@ export default function HomePage() {
   return (
     <main className="home">
 
+      {/* ================= HERO ================= */}
       <section className="home-hero">
+        {/* Background Image */}
         <img
           src="/images/banner.jpg"
           alt="SatvikMeals Home Style Food"
         />
 
+        {/* Soft Overlay */}
         <div className="hero-overlay" />
 
+        {/* Content */}
         <div className="hero-content">
           <h1>
             Ghar Jaisa Swad,<br />Delivered.
@@ -37,6 +41,7 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ================= QUICK ACTIONS ================= */}
       <section className="home-actions">
         {[
           { label: "Weekly Menu", icon: "📅", href: "/menu" },
@@ -57,10 +62,12 @@ export default function HomePage() {
         ))}
       </section>
 
+      {/* ================= PRICING ================= */}
       <section className="home-pricing">
         <h2>Affordable Meal Plans</h2>
 
         <div className="pricing-row">
+          {/* Daily */}
           <div className="price-card">
             <span className="tag">Try Once</span>
             <h3>Daily Meal</h3>
@@ -74,6 +81,7 @@ export default function HomePage() {
             </Link>
           </div>
 
+          {/* Monthly */}
           <div className="price-card highlight">
             <span className="tag popular">Most Popular</span>
             <h3>1 Month Plan</h3>
@@ -87,6 +95,7 @@ export default function HomePage() {
             </Link>
           </div>
 
+          {/* 2 Month */}
           <div className="price-card">
             <span className="tag">Best Value</span>
             <h3>2 Month Plan</h3>
@@ -102,6 +111,7 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ================= TRUST STRIP ================= */}
       <section className="home-trust">
         {[
           ["🌿", "100% Veg"],
@@ -116,6 +126,7 @@ export default function HomePage() {
         ))}
       </section>
 
+      {/* ================= CONTACT ================= */}
       <section className="home-contact">
         <h2>Contact Us</h2>
         <p>📍 Patna, Bihar</p>
@@ -123,6 +134,7 @@ export default function HomePage() {
         <p>⏰ Lunch & Dinner Service</p>
       </section>
 
+      {/* ================= FOOTER ================= */}
       <footer className="home-footer">
         © 2025 SatvikMeals • Pure Veg • Home Style
       </footer>

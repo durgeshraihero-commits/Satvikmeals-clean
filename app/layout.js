@@ -2,7 +2,7 @@ import "./globals.css";
 import Link from "next/link";
 import { getUserFromToken } from "@/lib/auth";
 import LogoutButton from "./components/LogoutButton";
-import PageLoader from "./components/PageLoader";
+import PageLoader from "./components/PageLoader"; // ✅ ADD THIS
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 
@@ -17,6 +17,7 @@ export default async function RootLayout({ children }) {
   let coins = 0;
   let firstName = "";
 
+  // 🔐 SAFE DB READ (NO LOGIC CHANGE)
   if (user?.email) {
     await dbConnect();
     const dbUser = await User.findOne({ email: user.email }).lean();
@@ -27,10 +28,13 @@ export default async function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
+        {/* 🔄 GLOBAL PAGE LOADER (YouTube-style) */}
         <PageLoader />
 
+        {/* ================= TOP PERSONAL HEADER ================= */}
         <header className="navbar">
           <div className="nav-container">
+            {/* LEFT: BRAND + GREETING */}
             <div>
               <div className="logo">🌿 SatvikMeals</div>
               {user && (
@@ -40,6 +44,7 @@ export default async function RootLayout({ children }) {
               )}
             </div>
 
+            {/* RIGHT: COINS + CART + AUTH */}
             <div className="nav-actions">
               {user && (
                 <div className="coin-pill">
@@ -70,8 +75,10 @@ export default async function RootLayout({ children }) {
           </div>
         </header>
 
+        {/* ================= PAGE CONTENT ================= */}
         <main className="container">{children}</main>
 
+        {/* ================= BOTTOM FLOATING NAV (APP FEEL) ================= */}
         {user && (
           <nav
             style={{
@@ -88,10 +95,12 @@ export default async function RootLayout({ children }) {
               zIndex: 999,
             }}
           >
+            {/* HOME */}
             <Link href="/dashboard" style={{ fontSize: 18 }}>
               🏠
             </Link>
 
+            {/* CENTER ACTION (MENU / ORDER) */}
             <Link
               href="/menu"
               style={{
@@ -106,6 +115,7 @@ export default async function RootLayout({ children }) {
               🍱
             </Link>
 
+            {/* ACCOUNT */}
             <Link href="/dashboard" style={{ fontSize: 18 }}>
               👤
             </Link>
