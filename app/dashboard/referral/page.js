@@ -6,19 +6,22 @@ export default function ReferralPage() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetch("/api/user/me", {
-      credentials: "include",
-      cache: "no-store",
+useEffect(() => {
+  fetch("/api/user/me", {
+    method: "GET",
+    credentials: "same-origin",
+    cache: "no-store",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then(res => res.json())
+    .then(data => {
+      setUser(data.user);
+      setLoading(false);
     })
-      .then(res => res.json())
-      .then(data => {
-        setUser(data.user);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, []);
-
+    .catch(() => setLoading(false));
+}, []);
   function copyCode() {
     if (!user?.referralCode) return;
     navigator.clipboard.writeText(user.referralCode);
