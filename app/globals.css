@@ -698,3 +698,77 @@ button:active,
     align-self: flex-end;
   }
 }
+/* ================= HOME HERO ================= */
+
+.home-hero {
+  position: relative;
+  width: 100%;
+  height: 70vh;
+  max-height: 520px;
+  overflow: hidden;
+  border-radius: 0 0 28px 28px;
+}
+
+.home-hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* premium soft overlay */
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.15),
+    rgba(0,0,0,0.35)
+  );
+  z-index: 1;
+}
+
+/* hero text */
+.hero-content {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 0 18px;
+  color: #ffffff;
+}
+
+.hero-content h1 {
+  font-family: "Merriweather", serif;
+  font-size: 34px;
+  font-weight: 900;
+  line-height: 1.25;
+  margin-bottom: 12px;
+}
+
+.hero-content p {
+  font-size: 15px;
+  opacity: 0.95;
+  margin-bottom: 20px;
+}
+
+/* buttons */
+.hero-actions {
+  display: flex;
+  gap: 12px;
+}
+
+/* ================= MOBILE FIX ================= */
+
+@media (max-width: 480px) {
+  .home-hero {
+    height: 58vh;
+  }
+
+  .hero-content h1 {
+    font-size: 28px;
+  }
+}

@@ -8,18 +8,34 @@ export default function HomePage() {
 
       {/* ================= HERO ================= */}
       <section className="home-hero">
+        {/* Background Image */}
+        <img
+          src="/images/banner.jpg"
+          alt="SatvikMeals Home Style Food"
+        />
+
+        {/* Soft Overlay */}
         <div className="hero-overlay" />
-        <img src="/images/banner.jpg" alt="SatvikMeals" />
+
+        {/* Content */}
         <div className="hero-content">
-          <h1>Ghar Jaisa Swad, Delivered.</h1>
+          <h1>
+            Ghar Jaisa Swad,<br />Delivered.
+          </h1>
+
           <p>Pure Vegetarian Tiffin Service in Patna</p>
 
           <div className="hero-actions">
             <Link href="/menu">
-              <button className="btn gold">View Today’s Menu</button>
+              <button className="btn gold">
+                View Today’s Menu
+              </button>
             </Link>
+
             <Link href="/subscribe">
-              <button className="btn green">Subscribe Now</button>
+              <button className="btn green">
+                Subscribe Now
+              </button>
             </Link>
           </div>
         </div>
@@ -35,7 +51,11 @@ export default function HomePage() {
           { label: "Payments", icon: "🧾", href: "/dashboard/payments" },
           { label: "Support", icon: "🎧", href: "/dashboard/complaint" },
         ].map((item, i) => (
-          <Link key={i} href={item.href} className="action-card">
+          <Link
+            key={i}
+            href={item.href}
+            className="action-card"
+          >
             <span>{item.icon}</span>
             <p>{item.label}</p>
           </Link>
@@ -47,33 +67,45 @@ export default function HomePage() {
         <h2>Affordable Meal Plans</h2>
 
         <div className="pricing-row">
+          {/* Daily */}
           <div className="price-card">
             <span className="tag">Try Once</span>
             <h3>Daily Meal</h3>
             <p className="price">₹59</p>
             <small>Perfect for trial</small>
+
             <Link href="/subscribe">
-              <button className="btn gold">Order Today</button>
+              <button className="btn gold">
+                Order Today
+              </button>
             </Link>
           </div>
 
+          {/* Monthly */}
           <div className="price-card highlight">
             <span className="tag popular">Most Popular</span>
             <h3>1 Month Plan</h3>
             <p className="price">₹3099</p>
             <small>Only ₹50 / meal</small>
+
             <Link href="/subscribe">
-              <button className="btn green">Subscribe</button>
+              <button className="btn green">
+                Subscribe
+              </button>
             </Link>
           </div>
 
+          {/* 2 Month */}
           <div className="price-card">
             <span className="tag">Best Value</span>
             <h3>2 Month Plan</h3>
             <p className="price">₹5999</p>
             <small>Save ₹1200+</small>
+
             <Link href="/subscribe">
-              <button className="btn green">Best Deal</button>
+              <button className="btn green">
+                Best Deal
+              </button>
             </Link>
           </div>
         </div>
@@ -86,10 +118,10 @@ export default function HomePage() {
           ["👨‍🍳", "Home Style"],
           ["🕒", "Fresh Daily"],
           ["🛡️", "Hygienic"],
-        ].map((t, i) => (
+        ].map((item, i) => (
           <div key={i} className="trust-item">
-            <span>{t[0]}</span>
-            <p>{t[1]}</p>
+            <span>{item[0]}</span>
+            <p>{item[1]}</p>
           </div>
         ))}
       </section>
